@@ -437,7 +437,7 @@ input[type="radio"]{
     </label>
 	
 	<label class="west-box">
-	  <input type="checkbox" id="signOnlyBhavaToggle">
+	  <input type="checkbox" id="signOnlyBhavaToggle" checked>
 	  Sign2Sign
 	</label>
 	
@@ -509,8 +509,12 @@ TABLE-1 : DATA INPUT TABLE
 <div class="panel">
   <button id="clearBtn">Clear All</button>
   <button id="saveBtn">Save Chart</button>
+
   <button id="loadBtn">Load Chart</button>
+  <button id="loadSwissBtn">Load Swiss</button>
+
   <input type="file" id="fileInput" accept=".json" hidden>
+  <input type="file" id="swissFileInput" accept=".json" hidden>
 </div>
 
 
@@ -666,7 +670,7 @@ if(starLord && data[starLord]?.sign){
         <td>${p}</td>
         <td>${fromALP_Planet}</td>
         <td>${planetLords}</td>
-        <td>${nakName} – Pada ${pada}</td>
+        <td>[ ${(nakIndex * 4) + pada} ] ${nakName} – Pada ${pada}</td>
         <td>${starLord}</td>
         <td>${fromALP_Star}</td>
         <td>${lordsOfALP}</td>
@@ -1312,7 +1316,7 @@ if(placedHouse){
     alpNakshatraBody.innerHTML += `
       <tr>
         <td>${h}</td>
-        <td>${NAKSHATRAS[nIndex][0]} – Pada ${pIndex}</td>
+        <td>[ ${(nIndex * 4) + pIndex} ] ${NAKSHATRAS[nIndex][0]} – Pada ${pIndex}</td>
         <td>${lord}</td>
         <td>${placedHouse}</td>
         <td>${lordsOf}</td>
@@ -1345,7 +1349,10 @@ function updateALPControls(alpAbs){
 
   const sIdx = Math.floor(a / 30);
   alpSignLabel.textContent =
-  SIGNS[sIdx] + " – " + RASI_DUAL[SIGNS[sIdx]];
+  "[ " + (sIdx + 1) + " ] " +
+  SIGNS[sIdx] + " – " +
+  RASI_DUAL[SIGNS[sIdx]];
+
 
 
   const signStartAbs = sIdx * 30;
@@ -1358,7 +1365,9 @@ function updateALPControls(alpAbs){
   const pIdx = (Math.floor(a / PADA_SIZE) % 4) + 1;
 
   alpPadaLabel.textContent =
-    NAKSHATRAS[nIdx][0] + " – Pada " + pIdx;
+  "[ " + ((nIdx * 4) + pIdx) + " ] " +
+  NAKSHATRAS[nIdx][0] + " – Pada " + pIdx;
+
 
   const padaIndex = Math.floor(a / PADA_SIZE);
   const padaStartAbs = padaIndex * PADA_SIZE;
@@ -1688,7 +1697,7 @@ function buildKundaliLordsTable3(){
     body.innerHTML += `
       <tr>
         <td>${h}</td>
-        <td>${sign}</td>
+        <td>[ ${SIGNS.indexOf(sign) + 1} ] ${sign} – ${RASI_DUAL[sign]}</td>
         <td>${signLord}</td>
         <td>${lordsOfALP}</td>
         <td>${fromALP}</td>
@@ -1834,7 +1843,7 @@ function buildRahuKetuTable(){
     body.innerHTML += `
       <tr>
         <td>${node}</td>
-        <td>${zodiacSign}</td>
+        <td>[ ${SIGNS.indexOf(zodiacSign) + 1} ] ${zodiacSign} – ${RASI_DUAL[zodiacSign]}</td>
         <td>${dispositor}</td>
         <td>${lordsOfALP}</td>
         <td>${fromALP}</td>
@@ -2431,7 +2440,10 @@ function buildRasiDateTable(){
 
     const signIndex = (startSignIndex + i) % 12;
     const rasiName =
-      SIGNS[signIndex] + " – " + RASI_DUAL[SIGNS[signIndex]];
+	  "[ " + (signIndex + 1) + " ] " +
+	  SIGNS[signIndex] + " – " +
+	  RASI_DUAL[SIGNS[signIndex]];
+
 
     const fromAbs = signIndex * 30;
     const toAbs   = fromAbs + 30;
@@ -2494,7 +2506,11 @@ function buildNakshatraPadaTable(){
     const nakIndex = (startNakIndex + n) % 27;
     const nakName  = NAKSHATRAS[nakIndex][0];
 
-    let row = `<tr><td>${nakName}</td>`;
+    const startPada = (nakIndex * 4) + 1;
+	const endPada   = startPada + 3;
+
+	let row = `<tr><td>[ ${startPada}–${endPada} ] ${nakName}</td>`;
+
 
     for(let p=0;p<4;p++){
 
@@ -2562,6 +2578,158 @@ setTimeout(()=>{
 
 
 
+
+
+
+<script>
+/* =========================================================
+   UNIVERSAL PLANET NAME NORMALIZATION
+   Swiss → Indian (Project Standard)
+   ========================================================= */
+
+const SWISS_TO_INTERNAL_PLANET_MAP = {
+  Sun: "Surya",
+  Moon: "Chandra",
+  Mars: "Mangala",
+  Mercury: "Budha",
+  Jupiter: "Guru",
+  Venus: "Shukra",
+  Saturn: "Shani",
+  Rahu: "Rahu",
+  Ketu: "Ketu",
+
+  /* Allow already-correct Indian names */
+  Surya: "Surya",
+  Chandra: "Chandra",
+  Mangala: "Mangala",
+  Budha: "Budha",
+  Guru: "Guru",
+  Shukra: "Shukra",
+  Shani: "Shani"
+};
+</script>
+
+
+
+
+
+
+
+
+
+
+<script>
+/* =========================================================
+   UNIVERSAL SWISS EPHEMERIS JSON LOADER (FINAL FIX v2)
+   - DOB from Swiss JSON
+   - Transit = TODAY (original ALP behavior)
+   - Planet name normalization
+   ========================================================= */
+
+loadSwissBtn.onclick = ()=> swissFileInput.click();
+
+swissFileInput.onchange = e=>{
+  const reader = new FileReader();
+
+  reader.onload = ()=>{
+    let json;
+    try{
+      json = JSON.parse(reader.result);
+    }catch{
+      alert("Invalid Swiss Ephemeris JSON");
+      return;
+    }
+
+    /* ================= DOB FROM META ================= */
+    if(json.meta?.datetime_utc){
+      try{
+        const d = new Date(json.meta.datetime_utc);
+
+        const yyyy = d.getUTCFullYear();
+        const mm   = String(d.getUTCMonth()+1).padStart(2,"0");
+        const dd   = String(d.getUTCDate()).padStart(2,"0");
+
+        dob.value = `${yyyy}-${mm}-${dd}`;
+
+        /* 🔥 KEEP ORIGINAL ALP BEHAVIOR */
+        transitDate.value = new Date().toISOString().split("T")[0];
+
+      }catch{}
+    }
+
+    /* ================= LAGNA ================= */
+    if(typeof json.lagna === "number"){
+      const lagAbs = ((json.lagna % 360) + 360) % 360;
+
+      const sIdx = Math.floor(lagAbs / 30);
+      const deg  = Math.floor(lagAbs % 30);
+      const min  = Math.floor(((lagAbs % 30) - deg) * 60);
+
+      birthSign.value = SIGNS[sIdx];
+      birthDeg.value  = deg;
+      birthMin.value  = min;
+    }
+
+    /* ================= PLANETS ================= */
+    if(json.planets && typeof json.planets === "object"){
+
+      Object.keys(data).forEach(p=>{
+        data[p].sign = "";
+        data[p].deg  = 0;
+        data[p].min  = 0;
+        data[p].sec  = 0;
+      });
+
+      Object.entries(json.planets).forEach(([rawName, absVal])=>{
+
+        const internal = SWISS_TO_INTERNAL_PLANET_MAP[rawName];
+        if(!internal || !data[internal]) return;
+
+        const abs = ((absVal % 360) + 360) % 360;
+
+        const sIdx = Math.floor(abs / 30);
+        const deg  = Math.floor(abs % 30);
+        const min  = Math.floor(((abs % 30) - deg) * 60);
+        const sec  = Math.round(
+          ((((abs % 30) - deg) * 60) - min) * 60
+        );
+
+        data[internal].sign = SIGNS[sIdx];
+        data[internal].deg  = deg;
+        data[internal].min  = min;
+        data[internal].sec  = sec;
+      });
+
+      /* FORCE RAHU–KETU OPPOSITION */
+      if(data.Rahu.sign){
+        const rAbs = absDeg(
+          data.Rahu.sign,
+          +data.Rahu.deg,
+          +data.Rahu.min,
+          +data.Rahu.sec
+        );
+        const kAbs = (rAbs + 180) % 360;
+
+        data.Ketu.sign = SIGNS[Math.floor(kAbs / 30)];
+        data.Ketu.deg  = Math.floor(kAbs % 30);
+        data.Ketu.min  = Math.floor(((kAbs % 30) - data.Ketu.deg) * 60);
+        data.Ketu.sec  = 0;
+      }
+    }
+
+    /* ================= FINAL APPLY ================= */
+    manualALPAbs = null;
+    buildTable();
+
+    setTimeout(()=>{
+      recalc();               // ALP now runs from birth → today
+      updateCurrentAge();     // age updates correctly
+    },0);
+  };
+
+  reader.readAsText(e.target.files[0]);
+};
+</script>
 
 
 
