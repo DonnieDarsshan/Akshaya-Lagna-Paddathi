@@ -367,6 +367,8 @@ input[type="radio"]{
 		}
 
 
+	
+
 
 
 
@@ -437,7 +439,7 @@ input[type="radio"]{
     </label>
 	
 	<label class="west-box">
-	  <input type="checkbox" id="signOnlyBhavaToggle" checked>
+	  <input type="checkbox" id="signOnlyBhavaToggle" >
 	  Sign2Sign
 	</label>
 	
@@ -454,6 +456,38 @@ input[type="radio"]{
     <select id="birthSign"><option value="">Sign</option></select>
     <select id="birthDeg"><option value="">Deg</option></select>
     <select id="birthMin"></select>
+
+
+
+<label style="margin-right:10px;font-weight:700;">
+  <input type="checkbox" id="alpLordshipToggle">
+  Enable Lordship
+</label>
+
+
+
+
+	<b>Lordship</b>
+
+<select id="alpLagnaLord" disabled>
+  <option value="">Auto (ALP Based)</option>
+  <option>Aries</option>
+  <option>Taurus</option>
+  <option>Gemini</option>
+  <option>Cancer</option>
+  <option>Leo</option>
+  <option>Virgo</option>
+  <option>Libra</option>
+  <option>Scorpio</option>
+  <option>Sagittarius</option>
+  <option>Capricorn</option>
+  <option>Aquarius</option>
+  <option>Pisces</option>
+</select>
+
+
+
+
 
     <!-- CURRENT AGE DISPLAY -->
     <div id="currentAgeBox"
@@ -506,6 +540,8 @@ TABLE-1 : DATA INPUT TABLE
 </table>
 
 
+
+
 <div class="panel">
   <button id="clearBtn">Clear All</button>
   <button id="saveBtn">Save Chart</button>
@@ -516,6 +552,8 @@ TABLE-1 : DATA INPUT TABLE
   <input type="file" id="fileInput" accept=".json" hidden>
   <input type="file" id="swissFileInput" accept=".json" hidden>
 </div>
+
+
 
 
 
@@ -545,6 +583,34 @@ TABLE-1 : DATA INPUT TABLE
 ">
 TABLE-2 : PLANET BIRTH NAKSHATRA → ALP LINK
 </h2>
+
+
+
+
+
+<div style="
+  margin-top:10px;
+  padding:8px 14px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#020617,#020617cc);
+  border:1px solid #334155;
+  font-weight:800;
+  color:#facc15;
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  justify-content:center;
+">
+  <span>$ : UnTenanted </span>
+  <span>% : Own Star / Own Sub</span>
+  <span>(R) : Retrograde</span>
+  <span># : Star-Lord Exchange</span>
+</div>
+
+
+
+
+
 
 <table>
 <thead>
@@ -882,6 +948,138 @@ const ASPECTS=[
 ];
 
 const data={};
+
+/* ================== RETROGRADE STORE (FROM SWISS JSON) ================== */
+const PLANET_RETRO = {};
+
+
+/* ================== UNTENANTED STORE ================== */
+const PLANET_UNTENANTED = {};
+
+
+
+/* ================== OWN STAR / SUB (%) ================== */
+const PLANET_OWN_STAR_SUB = {};
+
+/* ================== STAR LORD EXCHANGE (#) ================== */
+const PLANET_STAR_EXCHANGE = {};
+
+
+/* ================== PLANET LEGEND FORMATTER ================== */
+function getPlanetLegendSuffix(planet){
+
+  let out = "";
+
+  if(PLANET_UNTENANTED[planet])     out += " $";
+  if(PLANET_OWN_STAR_SUB[planet])   out += " %";
+  if(PLANET_RETRO[planet])          out += " (R)";
+  if(PLANET_STAR_EXCHANGE[planet])  out += " #";
+
+  return out;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================== COMPUTE UNTENANTED (STAR-LORD LEVEL – CORRECT) ================== */
+function computeUnTenanted(){
+
+  // reset
+  Object.keys(PLANET_UNTENANTED).forEach(p=>delete PLANET_UNTENANTED[p]);
+
+  const usedAsStarLord = new Set();
+
+  /* 1️⃣ Collect ALL star lords */
+  PLANETS.forEach(p=>{
+    if(p==="ALP" || !data[p]?.sign) return;
+
+    const star = getStarLordT3(p);
+    if(star){
+      usedAsStarLord.add(star);
+    }
+  });
+
+  /* 2️⃣ Any planet NOT used as star lord = UnTenanted */
+  PLANETS.forEach(p=>{
+    if(p==="ALP" || !data[p]?.sign) return;
+
+    if(!usedAsStarLord.has(p)){
+      PLANET_UNTENANTED[p] = true;
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================== COMPUTE OWN STAR / SUB (%) ================== */
+function computeOwnStarSub(){
+
+  Object.keys(PLANET_OWN_STAR_SUB).forEach(p=>delete PLANET_OWN_STAR_SUB[p]);
+
+  PLANETS.forEach(p=>{
+    if(p==="ALP" || !data[p]?.sign) return;
+
+    const star = getStarLordT3(p);
+    const sub  = getSubLordT3(p);
+
+    if(star === p || sub === p){
+      PLANET_OWN_STAR_SUB[p] = true;
+    }
+  });
+}
+
+/* ================== COMPUTE STAR LORD EXCHANGE (#) ================== */
+function computeStarExchange(){
+
+  Object.keys(PLANET_STAR_EXCHANGE).forEach(p=>delete PLANET_STAR_EXCHANGE[p]);
+
+  const starMap = {};
+
+  PLANETS.forEach(p=>{
+    if(p==="ALP" || !data[p]?.sign) return;
+    starMap[p] = getStarLordT3(p);
+  });
+
+  Object.keys(starMap).forEach(a=>{
+    const b = starMap[a];
+    if(b && starMap[b] === a && a !== b){
+      PLANET_STAR_EXCHANGE[a] = true;
+      PLANET_STAR_EXCHANGE[b] = true;
+    }
+  });
+}
+
+
+
+
+
+
+/* ================== PLANET META FLAGS (LEGENDS) ================== */
+const PLANET_META = {};
+
 PLANETS.forEach(p=>data[p]={sign:"",deg:0,min:0,sec:0});
 
 SIGNS.forEach(s=>birthSign.add(new Option(s,s)));
@@ -894,6 +1092,8 @@ function absDeg(sign,deg,min,sec=0){
 }
 
 let manualALPAbs=null;
+let __ALP_LAGNA_MANUAL__ = false;
+
 
 function computeALPAbs(){
   const birthAbs=absDeg(birthSign.value,+birthDeg.value,+birthMin.value);
@@ -901,6 +1101,57 @@ function computeALPAbs(){
   const days=(new Date(transitDate.value)-new Date(dob.value))/86400000;
   return (birthAbs + days*ALP_SPEED + 360)%360;
 }
+
+
+
+
+/* =========================================================
+   ALP LORDSHIP SIGN (0–14 SAME | 15–29 NEXT)
+   DOES NOT TOUCH BIRTH LAGNA
+   ========================================================= */
+function getALPLordshipSign(){
+
+  const toggle =
+    document.getElementById("alpLordshipToggle");
+
+  const alpAbs = computeALPAbs();
+  const signIndex = Math.floor(alpAbs / 30);
+
+  /* =====================================================
+     MODE-A : CHECKBOX OFF → SIMPLE SIGN LORDSHIP ONLY
+     ===================================================== */
+  if(!toggle || !toggle.checked){
+    return SIGNS[signIndex];
+  }
+
+  /* =====================================================
+     MODE-B : CHECKBOX ON
+     → MANUAL HAS PRIORITY
+     → ELSE APPLY 0–14 / 15–29 RULE
+     ===================================================== */
+
+  if(__ALP_LAGNA_MANUAL__){
+    return document.getElementById("alpLagnaLord")?.value || "";
+  }
+
+  const degFloat = alpAbs % 30;
+  const deg = Math.floor(degFloat);
+  const min = Math.floor((degFloat - deg) * 60);
+
+  const totalMin = (deg * 60) + min;
+
+  /* 0°00′ → 14°59′ = SAME | 15°00′+ = NEXT */
+  return (totalMin < 900)
+    ? SIGNS[signIndex]
+    : SIGNS[(signIndex + 1) % 12];
+}
+
+
+
+
+
+
+
 </script>
 
 
@@ -1127,7 +1378,9 @@ transitDate.value=new Date().toISOString().split("T")[0];
 ["dob","transitDate","birthSign","birthDeg","birthMin"].forEach(id=>{
   document.getElementById(id).onchange = ()=>{
     manualALPAbs = null;
-    recalc();
+__ALP_LAGNA_MANUAL__ = false;
+recalc();
+
   };
 });
 
@@ -1227,6 +1480,29 @@ function updateCurrentAge(){
                               .replace(" m"," months")
                               .replace(" d"," days")}`;
 }
+
+
+
+
+
+
+
+/* =========================================================
+   AUTO SYNC ALP LORDSHIP DROPDOWN
+   ========================================================= */
+function syncALPLagnaLord(){
+
+  const sel = document.getElementById("alpLagnaLord");
+  if(!sel) return;
+
+  /* If user manually selected, do NOT auto override */
+  if(__ALP_LAGNA_MANUAL__) return;
+
+  sel.value = getALPLordshipSign() || "";
+}
+
+
+
 
 
 
@@ -1377,12 +1653,83 @@ function updateALPControls(alpAbs){
   alpPadaEnd.textContent   = alpAbsToDate(padaEndAbs);
 }
 
+
+
+
+</script>
+
+
+
+<script>
+/* =========================================================
+   DISPLAY ONLY : CURRENT RUNNING RASI & PADA (ALP)
+   ========================================================= */
+
+function updateCurrentRasiPadaDisplay(){
+
+  if(!dob.value || !birthSign.value) return;
+
+  const abs = computeALPAbs();
+
+  /* -------- RASI -------- */
+  const signIndex = Math.floor(abs / 30);
+  const rasiText =
+    "[ " + (signIndex + 1) + " ] " +
+    SIGNS[signIndex] + " – " +
+    RASI_DUAL[SIGNS[signIndex]];
+
+  const rasiBox = document.getElementById("currentRasiStatus");
+  if(rasiBox){
+    rasiBox.textContent = "Currently Running Rasi : " + rasiText;
+  }
+
+  /* -------- NAKSHATRA + PADA -------- */
+  const NAK_SIZE  = 360 / 27;
+  const PADA_SIZE = 360 / 108;
+
+  const nakIndex  = Math.floor(abs / NAK_SIZE);
+  const padaIndex = Math.floor(abs / PADA_SIZE) % 4 + 1;
+
+  const nakText =
+    "[ " + ((nakIndex * 4) + padaIndex) + " ] " +
+    NAKSHATRAS[nakIndex][0] + " – Pada " + padaIndex;
+
+  const padaBox = document.getElementById("currentPadaStatus");
+  if(padaBox){
+    padaBox.textContent =
+      "Currently Running Nakshatra : " + nakText;
+  }
+}
+
+/* -------- SAFE GLOBAL HOOK -------- */
+if(!window.__CURRENT_RASI_PADA_DISPLAY__){
+  window.__CURRENT_RASI_PADA_DISPLAY__ = true;
+
+  const _origRecalc = recalc;
+  recalc = function(){
+    _origRecalc();
+    updateCurrentRasiPadaDisplay();
+  };
+}
+</script>
+
+
+
+
+
+
+
+
+<script>
+
 /* ================== SIGN BUTTONS ================== */
 
 alpSignPrev.onclick = ()=>{
   if(!dob.value || !birthSign.value)return;
   const idx = (getSignIndex(computeALPAbs()) + 11) % 12;
   manualALPAbs = idx * 30;
+  __ALP_LAGNA_MANUAL__ = false;
+
   recalc();
 };
 
@@ -1390,6 +1737,8 @@ alpSignNext.onclick = ()=>{
   if(!dob.value || !birthSign.value)return;
   const idx = (getSignIndex(computeALPAbs()) + 1) % 12;
   manualALPAbs = idx * 30;
+  __ALP_LAGNA_MANUAL__ = false;
+
   recalc();
 };
 
@@ -1400,6 +1749,8 @@ alpPadaPrev.onclick = ()=>{
   let idx = getPadaIndex(computeALPAbs()) - 1;
   if(idx < 0) idx = 107;
   manualALPAbs = (idx * PADA_SIZE) + (PADA_SIZE / 2);
+  __ALP_LAGNA_MANUAL__ = false;
+
   recalc();
 };
 
@@ -1408,6 +1759,8 @@ alpPadaNext.onclick = ()=>{
   let idx = getPadaIndex(computeALPAbs()) + 1;
   if(idx > 107) idx = 0;
   manualALPAbs = (idx * PADA_SIZE) + (PADA_SIZE / 2);
+  __ALP_LAGNA_MANUAL__ = false;
+
   recalc();
 };
 
@@ -1470,7 +1823,6 @@ fileInput.onchange = e=>{
 };
 
 clearBtn.onclick = ()=>{
-  if(!confirm("Clear entire chart?"))return;
   Object.keys(data).forEach(p=>data[p]={sign:"",deg:0,min:0});
   birthSign.value="";
   birthDeg.value="";
@@ -1514,9 +1866,9 @@ function getLordsOfPlanetFromALP(planet){
 
   if(!birthSign.value || birthDeg.value==="") return [];
 
-  const alpAbs  = computeALPAbs();
-  const alpSign = SIGNS[getSignIndex(alpAbs)];
-  const start   = SIGNS.indexOf(alpSign);
+  const alpSign = getALPLordshipSign();
+	const start   = SIGNS.indexOf(alpSign);
+
 
   let houses = [];
 
@@ -2233,6 +2585,69 @@ document
   ?.addEventListener("change", ()=>{
     if(typeof recalc === "function") recalc();
   });
+  
+  
+  document
+  .getElementById("alpLagnaLord")
+  ?.addEventListener("change", ()=>{
+    __ALP_LAGNA_MANUAL__ = true;
+    if(typeof recalc === "function") recalc();
+  });
+
+  
+  
+  
+  
+  
+  
+/* =========================================================
+   LORDSHIP TOGGLE (MANUAL ENABLE / DISABLE)
+   ========================================================= */
+
+const alpLordshipToggle =
+  document.getElementById("alpLordshipToggle");
+
+const alpLagnaLordSel =
+  document.getElementById("alpLagnaLord");
+
+/* Default state : OFF */
+if(alpLordshipToggle && alpLagnaLordSel){
+  alpLordshipToggle.checked = false;
+  alpLagnaLordSel.disabled  = true;
+}
+
+/* Toggle behavior */
+alpLordshipToggle?.addEventListener("change", ()=>{
+
+  if(alpLordshipToggle.checked){
+    /* ENABLE manual lordship */
+    alpLagnaLordSel.disabled = false;
+    __ALP_LAGNA_MANUAL__ = true;
+
+  }else{
+    /* DISABLE manual lordship → AUTO MODE */
+    alpLagnaLordSel.value = "";
+    alpLagnaLordSel.disabled = true;
+    __ALP_LAGNA_MANUAL__ = false;
+  }
+
+  if(typeof recalc === "function") recalc();
+});
+</script>
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
 </script>
 
 
@@ -2317,11 +2732,40 @@ document.addEventListener("click", function(e){
 const __origRecalc_global = recalc;
 recalc = function(){
   __origRecalc_global();
+  computeUnTenanted();
+  computeOwnStarSub();      // %
+  computeStarExchange();    // #
   applyStoredHighlights();
+  syncALPLagnaLord();
+  applyPlanetLegends();
 };
+
 
 /* Initial safety */
 setTimeout(applyStoredHighlights, 100);
+
+
+/* =========================================================
+   RETROGRADE LEGEND APPLIER (SAFE & NON-DESTRUCTIVE)
+   ========================================================= */
+function applyPlanetLegends(){
+
+  document.querySelectorAll("td, th").forEach(cell=>{
+
+    const txt = cell.textContent?.trim();
+    if(!txt) return;
+
+    if(!PLANETS.includes(txt)) return;
+    if(cell.dataset.retroApplied) return;
+
+    const suffix = getPlanetLegendSuffix(txt);
+    if(!suffix) return;
+
+    cell.textContent = txt + suffix;
+    cell.dataset.retroApplied = "1";
+  });
+}
+
 </script>
 
 
@@ -2356,6 +2800,22 @@ setTimeout(applyStoredHighlights, 100);
 TABLE-6 : RASI → RASI DATES (ALP)
 </h2>
 
+
+
+<div id="currentRasiStatus"
+     style="text-align:center;color:#facc15;font-weight:800;margin-bottom:8px;">
+  Currently Running Rasi : —
+</div>
+
+
+
+
+
+
+
+
+
+
 <table>
 <thead>
 <tr>
@@ -2385,6 +2845,18 @@ TABLE-6 : RASI → RASI DATES (ALP)
 TABLE-7 : NAKSHATRA → PADA DATES (ALP)
 </h2>
 
+
+
+
+<div id="currentPadaStatus"
+     style="text-align:center;color:#facc15;font-weight:800;margin-bottom:8px;">
+  Currently Running Nakshatra : —
+</div>
+
+
+
+
+
 <table>
 <thead>
 <tr>
@@ -2411,15 +2883,14 @@ TABLE-7 : NAKSHATRA → PADA DATES (ALP)
 
 
 
-
-
-
 <script>
-
 /* =========================================================
-   TABLE-6 : RASI → RASI DATE CALCULATION
+   TABLE-6 : RASI → RASI DATE CALCULATION (CORRECTED)
+   RULES:
+   1) First row = elapsed only (DOB → first exit)
+   2) Middle 11 = full rasis
+   3) Last row = ONLY last 10 years (110 → 120)
    ========================================================= */
-
 
 function buildRasiDateTable(){
 
@@ -2434,53 +2905,115 @@ function buildRasiDateTable(){
     +birthMin.value
   );
 
-  const startSignIndex = Math.floor(birthAbs / 30);
+  const janmaIndex = Math.floor(birthAbs / 30);
+  const janmaExitAbs = (janmaIndex + 1) * 30;
 
-  for(let i=0;i<12;i++){
+  /* ---------- HELPER ---------- */
+  function addRow(signIndex, fromAbs, toAbs){
 
-    const signIndex = (startSignIndex + i) % 12;
-    const rasiName =
-	  "[ " + (signIndex + 1) + " ] " +
-	  SIGNS[signIndex] + " – " +
-	  RASI_DUAL[SIGNS[signIndex]];
+    const name =
+      "[ " + (signIndex + 1) + " ] " +
+      SIGNS[signIndex] + " – " +
+      RASI_DUAL[SIGNS[signIndex]];
 
+    const fromDate = fromAbs !== null ? alpAbsToDate(fromAbs) : "";
+    const toDate   = toAbs   !== null ? alpAbsToDate(toAbs)   : "";
 
-    const fromAbs = signIndex * 30;
-    const toAbs   = fromAbs + 30;
+    const fromAge  = fromDate ? getAgeFromDOB(fromDate) : "";
+    const toAge    = toDate   ? getAgeFromDOB(toDate)   : "";
 
-    const fromDate = alpAbsToDate(fromAbs);
-    const toDate   = alpAbsToDate(toAbs);
+    const currentSignIndex = Math.floor(computeALPAbs() / 30);
+	const isRunningRasi = signIndex === currentSignIndex;
 
-    const fromAge = getAgeFromDOB(fromDate);
-    const toAge   = getAgeFromDOB(toDate);
+	body.innerHTML += `
+	  <tr class="${isRunningRasi ? "row-selected" : ""}">
 
-    body.innerHTML += `
-      <tr>
-        <td>${rasiName}</td>
+	  
+	  
+        <td>${name}</td>
         <td>
-          From : ${fromDate}<br>
-          <span style="display:block;margin-top:4px;color:#fde047;">
-            From : ${fromAge}
-          </span>
+          ${fromDate ? "From : " + fromDate : ""}
+          ${fromAge ? `<br><span style="color:#fde047;">${fromAge}</span>` : ""}
         </td>
         <td>
-          To : ${toDate}<br>
-          <span style="display:block;margin-top:4px;color:#fde047;">
-            To : ${toAge}
-          </span>
+          ${toDate ? "To : " + toDate : ""}
+          ${toAge ? `<br><span style="color:#fde047;">${toAge}</span>` : ""}
         </td>
       </tr>
     `;
   }
+
+  /* =====================================================
+     1️⃣ FIRST ROW — JANMA RASI (ELAPSED ONLY)
+     ===================================================== */
+  addRow(
+    janmaIndex,
+    birthAbs,
+    janmaExitAbs
+  );
+
+  /* =====================================================
+     2️⃣ NEXT 11 RASIS — FULL SPANS
+     ===================================================== */
+  for(let i=1;i<=11;i++){
+    const idx = (janmaIndex + i) % 12;
+    const fromAbs = idx * 30;
+    const toAbs   = fromAbs + 30;
+
+    addRow(idx, fromAbs, toAbs);
+  }
+
+  /* =====================================================
+     3️⃣ LAST ROW — JANMA RASI (ONLY 110 → 120 YEARS)
+     ===================================================== */
+
+  const start110 = new Date(dob.value);
+  start110.setFullYear(start110.getFullYear() + 110);
+
+  const end120 = new Date(dob.value);
+  end120.setFullYear(end120.getFullYear() + 120);
+
+  body.innerHTML += `
+    <tr>
+      <td>
+        [ ${janmaIndex + 1} ] ${SIGNS[janmaIndex]} – ${RASI_DUAL[SIGNS[janmaIndex]]}
+      </td>
+      <td>
+        From : ${start110.toISOString().split("T")[0]}<br>
+        <span style="color:#fde047;">110 y 0 m 0 d</span>
+      </td>
+      <td>
+        To : ${end120.toISOString().split("T")[0]}<br>
+        <span style="color:#fde047;">120 y 0 m 0 d</span>
+      </td>
+    </tr>
+  `;
 }
 </script>
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
 /* =========================================================
-   TABLE-7 : NAKSHATRA → PADA DATE CALCULATION
+   TABLE-7 : NAKSHATRA → PADA DATE CALCULATION (FINAL)
+   MATCHES TABLE-6 DESIGN EXACTLY
+   - First row  : Janma Nakshatra (DOB → exit only)
+   - Middle 26  : Full nakshatras
+   - Last row  : Janma Nakshatra (110 → 120 years only)
    ========================================================= */
 
 function buildNakshatraPadaTable(){
@@ -2499,30 +3032,66 @@ function buildNakshatraPadaTable(){
   const NAK_SIZE  = 360 / 27;
   const PADA_SIZE = 360 / 108;
 
-  const startNakIndex = Math.floor(birthAbs / NAK_SIZE);
+  const janmaNakIndex = Math.floor(birthAbs / NAK_SIZE);
+  const janmaNakStart = janmaNakIndex * NAK_SIZE;
+  const janmaNakEnd   = janmaNakStart + NAK_SIZE;
 
-  for(let n=0;n<27;n++){
+  /* ================= HELPER ================= */
+  function buildNakRow(nakIndex, fromAbs, toAbs){
 
-    const nakIndex = (startNakIndex + n) % 27;
-    const nakName  = NAKSHATRAS[nakIndex][0];
-
+    const nakName = NAKSHATRAS[nakIndex][0];
     const startPada = (nakIndex * 4) + 1;
-	const endPada   = startPada + 3;
+    const endPada   = startPada + 3;
 
-	let row = `<tr><td>[ ${startPada}–${endPada} ] ${nakName}</td>`;
+
+
+
+   const abs = computeALPAbs();
+	const runningNakIndex = Math.floor(abs / (360 / 27));
+
+	const isRunningNak = nakIndex === runningNakIndex;
+
+	let row =
+	  `<tr class="${isRunningNak ? "row-selected" : ""}">` +
+	  `<td>[ ${startPada}–${endPada} ] ${nakName}</td>`;
+
+
+
+
+
+
+
+
 
 
     for(let p=0;p<4;p++){
 
       const padaIndex = (nakIndex * 4) + p;
-      const padaStartAbs = padaIndex * PADA_SIZE;
-      const padaEndAbs   = padaStartAbs + PADA_SIZE;
+      const pStartAbs = (padaIndex * PADA_SIZE);
+      const pEndAbs   = pStartAbs + PADA_SIZE;
 
-      const fromDate = alpAbsToDate(padaStartAbs);
-      const toDate   = alpAbsToDate(padaEndAbs);
+      const effStart = Math.max(pStartAbs, fromAbs);
+      const effEnd   = Math.min(pEndAbs, toAbs);
 
-      const fromAge  = getAgeFromDOB(fromDate);
-      const toAge    = getAgeFromDOB(toDate);
+      if(effStart >= effEnd){
+        row += `<td></td>`;
+        continue;
+      }
+
+     let fromDate = alpAbsToDate(effStart);
+	let toDate   = alpAbsToDate(effEnd);
+
+	/* ===== SAFE DATE OBJECTS (NO STRING COMPARISON) ===== */
+	const toObj   = new Date(toDate);
+	const dobObj  = new Date(dob.value);
+	const end120  = new Date(dobObj);
+	end120.setFullYear(end120.getFullYear() + 120);
+
+	
+
+	const fromAge = getAgeFromDOB(fromDate);
+	const toAge   = getAgeFromDOB(toDate);
+
 
       row += `
         <td>
@@ -2540,7 +3109,61 @@ function buildNakshatraPadaTable(){
     row += `</tr>`;
     body.innerHTML += row;
   }
+
+  /* =====================================================
+     1️⃣ FIRST ROW — JANMA NAKSHATRA (ELAPSED ONLY)
+     ===================================================== */
+  buildNakRow(
+    janmaNakIndex,
+    birthAbs,
+    janmaNakEnd
+  );
+
+  /* =====================================================
+     2️⃣ NEXT 26 NAKSHATRAS — FULL SPANS
+     ===================================================== */
+  for(let i=1;i<=26;i++){
+    const idx = (janmaNakIndex + i) % 27;
+    buildNakRow(
+      idx,
+      idx * NAK_SIZE,
+      (idx + 1) * NAK_SIZE
+    );
+  }
+
+
+
+
+
+
+
+
+/* =====================================================
+   3️⃣ LAST ROW — JANMA NAKSHATRA (FULL CONTINUATION)
+   ===================================================== */
+
+buildNakRow(
+  janmaNakIndex,
+  janmaNakStart,
+  janmaNakStart + NAK_SIZE
+);
+
+
+
+  
+  
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2552,12 +3175,14 @@ if(!window.__RASI_PADA_TABLES__){
   window.__RASI_PADA_TABLES__ = true;
 
   const _origRecalc = recalc;
-  recalc = function(){
-    _origRecalc();
-    buildRasiDateTable();
-    buildNakshatraPadaTable();
+recalc = function(){
+  _origRecalc();
+  buildRasiDateTable();
+  buildNakshatraPadaTable();
+  
 	updateCurrentAge();
-  };
+};
+
 }
 
 /* Initial load */
@@ -2632,9 +3257,29 @@ swissFileInput.onchange = e=>{
   const reader = new FileReader();
 
   reader.onload = ()=>{
+  
+  
+  
+  
+
+  
+  
     let json;
     try{
       json = JSON.parse(reader.result);
+	  
+	  /* ================== LOAD RETROGRADE FLAGS (SAFE) ================== */
+	if(json.planets_retro && typeof json.planets_retro === "object"){
+	  Object.keys(json.planets_retro).forEach(p=>{
+		if(SWISS_TO_INTERNAL_PLANET_MAP[p]){
+		  const internal = SWISS_TO_INTERNAL_PLANET_MAP[p];
+		  PLANET_RETRO[internal] = !!json.planets_retro[p];
+		}
+	  });
+	}
+
+	  
+	  
     }catch{
       alert("Invalid Swiss Ephemeris JSON");
       return;
