@@ -374,6 +374,116 @@ input[type="radio"]{
 
 
 
+
+
+
+
+
+/* =========================================================
+   TABLE-7 : NAKSHATRA & ACTIVE PADA HIGHLIGHT (ALP LIVE)
+   ========================================================= */
+
+.t7-nak-active{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(250,204,21,0.22),
+      rgba(250,204,21,0.12)
+    ) !important;
+
+  border-color:rgba(250,204,21,0.7) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(250,204,21,0.55),
+    inset 0 0 10px rgba(250,204,21,0.25);
+
+  font-weight:900;
+  color:#fde047;
+}
+
+.t7-pada-active{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(134,239,172,0.28),
+      rgba(52,211,153,0.14)
+    ) !important;
+
+  border-color:rgba(52,211,153,0.8) !important;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(52,211,153,0.65),
+    inset 0 0 12px rgba(52,211,153,0.35);
+
+  font-weight:900;
+  color:#86efac;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#alpQuickNav{
+  position:fixed;
+  top:6px;
+  right:6px;
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  gap:4px;
+
+  padding:4px 6px;
+  border-radius:9px;
+
+  background:linear-gradient(180deg,#020617,#020617dd);
+  border:1px solid #a16207;
+  box-shadow:0 0 6px rgba(250,204,21,.3);
+}
+
+#alpQuickNav .nav-btn{
+  min-width:22px;
+  height:22px;
+
+  padding:0 4px;
+  font-size:11px;
+  font-weight:800;
+
+  background:#020617;
+  color:#facc15;
+
+  border:1px solid #334155;
+  border-radius:5px;
+}
+
+#alpQuickNav .nav-label-btn{
+  background:#020617;
+  color:#fde047;
+  letter-spacing:0.6px;
+}
+
+
+
+
+
+
+
+
+
+
+
 </style>
 
 
@@ -398,7 +508,7 @@ input[type="radio"]{
 
 <body>
 
-<h1>
+<h1 id="heading-A">
   Akshaya Lagna Paddathi
   <span class="subtitle-inline">ALP Lagna progresses with time · Planets remain fixed</span>
 </h1>
@@ -508,7 +618,7 @@ input[type="radio"]{
 
 
 
-<h2 style="
+<h2 id="table-1" style="
   margin-top:20px;
   margin-bottom:12px;
   text-align:center;
@@ -572,7 +682,7 @@ TABLE-1 : DATA INPUT TABLE
      TABLE-2 : PLANET → BIRTH NAKSHATRA FROM ALP (EXTENDED)
      ========================================================= -->
 
-<h2 style="
+<h2 id="table-2" style="
   margin-top:30px;
   margin-bottom:12px;
   text-align:center;
@@ -779,7 +889,7 @@ if(!window.__TABLE2_FINAL_KP_VEDIC__){
 
 
 
-<h2 style="
+<h2 id="table-3" style="
   margin-top:30px;
   margin-bottom:12px;
   text-align:center;
@@ -848,7 +958,7 @@ TABLE-3 : ALP NAKSHATRA & BHAVA ANALYSIS
      TABLE-4 : KUNDALI LORDS FROM ALP (DARKER VARIANT)
      ========================================================= -->
 
-<h2 style="
+<h2 id="table-4" style="
   margin-top:40px;
   margin-bottom:14px;
   text-align:center;
@@ -2294,7 +2404,7 @@ document
      PART 5 : TABLE-5 (PLANET ENTITY BOXES – FINAL STABLE)
      ========================================================= -->
 
-<h2 style="
+<h2 id="table-5" style="
   margin-top:40px;
   margin-bottom:14px;
   text-align:center;
@@ -2788,7 +2898,7 @@ function applyPlanetLegends(){
      TABLE-6 : RASI → RASI PRE CALCULATED DATES
      ========================================================= -->
 
-<h2 style="
+<h2 id="table-6" style="
   margin-top:40px;
   margin-bottom:14px;
   text-align:center;
@@ -2833,7 +2943,7 @@ TABLE-6 : RASI → RASI DATES (ALP)
      TABLE-7 : NAKSHATRA → PADA PRE CALCULATED DATES
      ========================================================= -->
 
-<h2 style="
+<h2 id="table-7" style="
   margin-top:40px;
   margin-bottom:14px;
   text-align:center;
@@ -3016,6 +3126,13 @@ function buildRasiDateTable(){
    - Last row  : Janma Nakshatra (110 → 120 years only)
    ========================================================= */
 
+
+
+
+
+
+
+
 function buildNakshatraPadaTable(){
 
   const body = document.getElementById("nakshatraPadaBody");
@@ -3036,38 +3153,32 @@ function buildNakshatraPadaTable(){
   const janmaNakStart = janmaNakIndex * NAK_SIZE;
   const janmaNakEnd   = janmaNakStart + NAK_SIZE;
 
+  /* ===== CURRENT RUNNING NAKSHATRA & PADA (ALP) ===== */
+  const currentAbs       = computeALPAbs();
+  const runningNakIndex  = Math.floor(currentAbs / NAK_SIZE);
+  const runningPadaIndex = Math.floor(currentAbs / PADA_SIZE); // 0–107
+
   /* ================= HELPER ================= */
   function buildNakRow(nakIndex, fromAbs, toAbs){
 
-    const nakName = NAKSHATRAS[nakIndex][0];
+    const nakName   = NAKSHATRAS[nakIndex][0];
     const startPada = (nakIndex * 4) + 1;
     const endPada   = startPada + 3;
 
+    let row =
+      `<tr>
+        <td class="${nakIndex === runningNakIndex ? "t7-nak-active" : ""}">
+          [ ${startPada}–${endPada} ] ${nakName}
+        </td>`;
 
+    for(let p=0; p<4; p++){
 
+      const absolutePadaIndex = (nakIndex * 4) + p;
+      const isRunningPada =
+        nakIndex === runningNakIndex &&
+        absolutePadaIndex === runningPadaIndex;
 
-   const abs = computeALPAbs();
-	const runningNakIndex = Math.floor(abs / (360 / 27));
-
-	const isRunningNak = nakIndex === runningNakIndex;
-
-	let row =
-	  `<tr class="${isRunningNak ? "row-selected" : ""}">` +
-	  `<td>[ ${startPada}–${endPada} ] ${nakName}</td>`;
-
-
-
-
-
-
-
-
-
-
-    for(let p=0;p<4;p++){
-
-      const padaIndex = (nakIndex * 4) + p;
-      const pStartAbs = (padaIndex * PADA_SIZE);
+      const pStartAbs = absolutePadaIndex * PADA_SIZE;
       const pEndAbs   = pStartAbs + PADA_SIZE;
 
       const effStart = Math.max(pStartAbs, fromAbs);
@@ -3078,23 +3189,14 @@ function buildNakshatraPadaTable(){
         continue;
       }
 
-     let fromDate = alpAbsToDate(effStart);
-	let toDate   = alpAbsToDate(effEnd);
+      const fromDate = alpAbsToDate(effStart);
+      const toDate   = alpAbsToDate(effEnd);
 
-	/* ===== SAFE DATE OBJECTS (NO STRING COMPARISON) ===== */
-	const toObj   = new Date(toDate);
-	const dobObj  = new Date(dob.value);
-	const end120  = new Date(dobObj);
-	end120.setFullYear(end120.getFullYear() + 120);
-
-	
-
-	const fromAge = getAgeFromDOB(fromDate);
-	const toAge   = getAgeFromDOB(toDate);
-
+      const fromAge = getAgeFromDOB(fromDate);
+      const toAge   = getAgeFromDOB(toDate);
 
       row += `
-        <td>
+        <td class="${isRunningPada ? "t7-pada-active" : ""}">
           From : ${fromDate}<br>
           To : ${toDate}
           <div style="height:6px;"></div>
@@ -3122,7 +3224,7 @@ function buildNakshatraPadaTable(){
   /* =====================================================
      2️⃣ NEXT 26 NAKSHATRAS — FULL SPANS
      ===================================================== */
-  for(let i=1;i<=26;i++){
+  for(let i=1; i<=26; i++){
     const idx = (janmaNakIndex + i) % 27;
     buildNakRow(
       idx,
@@ -3131,27 +3233,14 @@ function buildNakshatraPadaTable(){
     );
   }
 
-
-
-
-
-
-
-
-/* =====================================================
-   3️⃣ LAST ROW — JANMA NAKSHATRA (FULL CONTINUATION)
-   ===================================================== */
-
-buildNakRow(
-  janmaNakIndex,
-  janmaNakStart,
-  janmaNakStart + NAK_SIZE
-);
-
-
-
-  
-  
+  /* =====================================================
+     3️⃣ LAST ROW — JANMA NAKSHATRA (FULL CONTINUATION)
+     ===================================================== */
+  buildNakRow(
+    janmaNakIndex,
+    janmaNakStart,
+    janmaNakStart + NAK_SIZE
+  );
 }
 
 
@@ -3380,6 +3469,112 @@ swissFileInput.onchange = e=>{
 
 
 
+
+<div id="alpQuickNav">
+
+  <button class="nav-btn" onclick="jumpTo('heading-A')">A</button>
+
+  <button class="nav-btn" onclick="alpSignPrev.click()">&lt;</button>
+  <button class="nav-btn nav-label-btn" onclick="resetToToday()">RASI</button>
+  <button class="nav-btn" onclick="alpSignNext.click()">&gt;</button>
+
+  <button class="nav-btn" onclick="alpPadaPrev.click()">&lt;</button>
+  <button class="nav-btn nav-label-btn" onclick="resetToToday()">PADA</button>
+  <button class="nav-btn" onclick="alpPadaNext.click()">&gt;</button>
+
+  <button class="nav-btn" onclick="jumpTo('table-1')">1</button>
+  <button class="nav-btn" onclick="jumpTo('table-2')">2</button>
+  <button class="nav-btn" onclick="jumpTo('table-3')">3</button>
+  <button class="nav-btn" onclick="jumpTo('table-4')">4</button>
+  <button class="nav-btn" onclick="jumpTo('table-5')">5</button>
+  <button class="nav-btn" onclick="jumpTo('table-6')">6</button>
+  <button class="nav-btn" onclick="jumpTo('table-7')">7</button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+/* =========================================================
+   QUICK NAV — ID BASED (EXACT TARGETING)
+   ========================================================= */
+function jumpTo(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+</script>
+
+
+
+
+
+
+
+<script>
+/* =========================================================
+   QUICK NAV — EXACT ID SCROLL (NEW)
+   ========================================================= */
+function jumpTo(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+</script>
+
+
+
+
+
+
+
+<script>
+/* =========================================================
+   QUICK NAV — SINGLE SOURCE OF TRUTH (FINAL)
+   ========================================================= */
+function jumpTo(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+</script>
+
+
+
+
+
+<script>
+function resetToToday(){
+  manualALPAbs = null;
+  __ALP_LAGNA_MANUAL__ = false;
+
+  transitDate.value = new Date().toISOString().split("T")[0];
+
+  recalc();
+}
+</script>
 
 
 
