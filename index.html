@@ -88,6 +88,35 @@ button:hover{
   box-shadow:var(--glow-gold);
 }
 
+
+
+
+
+
+
+/* =========================================================
+   TABLE-1 COLLAPSE SYSTEM
+   ========================================================= */
+
+/* =========================================================
+   TABLE-1 COLLAPSE (CONTENT ONLY)
+   ========================================================= */
+
+#table1ContentWrapper{
+  overflow:hidden;
+  transition:max-height .45s ease, opacity .35s ease;
+  max-height:3000px;
+  opacity:1;
+}
+
+#table1ContentWrapper.collapsed{
+  max-height:0;
+  opacity:0;
+}
+
+
+
+
 /* ================== TABLES ================== */
 table{
   width:100%;
@@ -144,6 +173,12 @@ table tr th[colspan]{
   color:var(--gold-main);
   min-width:260px;
 }
+
+
+
+
+
+
 
 
 
@@ -477,7 +512,21 @@ input[type="radio"]{
 
 
 
+/* =========================================================
+   LOAD SWISS EPHEMERIS BUTTON (YELLOW)
+   ========================================================= */
+.load-swiss-ephemeris{
+  background:linear-gradient(135deg,#facc15,#fde047);
+  color:#020617;
+  font-weight:900;
+  border:1px solid #a16207;
+  letter-spacing:1px;
+}
 
+.load-swiss-ephemeris:hover{
+  background:linear-gradient(135deg,#fde047,#fef08a);
+  box-shadow:0 0 14px rgba(250,204,21,.65);
+}
 
 
 
@@ -618,6 +667,51 @@ input[type="radio"]{
 
 
 
+
+
+
+
+
+
+
+
+<!-- =========================================================
+     TABLE-1 HEADER (ALWAYS VISIBLE)
+     ========================================================= -->
+
+<div class="panel">
+  <div class="row" style="justify-content:center; gap:18px; flex-wrap:wrap;">
+
+    <button id="loadSwissTopBtn" class="load-swiss-ephemeris">
+      Load Swiss Ephemeris
+    </button>
+
+    <!-- ================= NODE MODE SELECTOR ================= -->
+    <div style="
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      color:#facc15;
+      border:1px solid #a16207;
+      padding:6px 14px;
+      border-radius:10px;
+      background:linear-gradient(180deg,#020617,#020617cc);
+    ">
+      Node Type :
+
+      <label style="display:flex;align-items:center;gap:4px;">
+        <input type="radio" name="nodeMode" value="TRUE">
+		True Node
+
+		<input type="radio" name="nodeMode" value="MEAN" checked>
+		Mean Node
+      </label>
+    </div>
+
+  </div>
+</div>
+
 <h2 id="table-1" style="
   margin-top:20px;
   margin-bottom:12px;
@@ -626,12 +720,13 @@ input[type="radio"]{
   font-weight:900;
   letter-spacing:1.5px;
   text-shadow:0 0 10px #92400e;
+  cursor:pointer;
 ">
 TABLE-1 : DATA INPUT TABLE
 </h2>
 
-
-
+<!-- COLLAPSIBLE CONTENT ONLY -->
+<div id="table1ContentWrapper" class="collapsed">
 
 <table>
 <thead>
@@ -649,23 +744,16 @@ TABLE-1 : DATA INPUT TABLE
 <tbody id="tableBody"></tbody>
 </table>
 
-
-
-
 <div class="panel">
   <button id="clearBtn">Clear All</button>
   <button id="saveBtn">Save Chart</button>
-
   <button id="loadBtn">Load Chart</button>
-  <button id="loadSwissBtn">Load Swiss</button>
 
   <input type="file" id="fileInput" accept=".json" hidden>
   <input type="file" id="swissFileInput" accept=".json" hidden>
 </div>
 
-
-
-
+</div>
 
 
 
@@ -773,15 +861,9 @@ function buildTable2(){
     );
 
     /* KP RULE : KETU ALWAYS OPPOSITE RAHU */
-    if(p === "Ketu" && data["Rahu"]?.sign){
-      const rAbs = absDeg(
-        data["Rahu"].sign,
-        +data["Rahu"].deg,
-        +data["Rahu"].min,
-        +data["Rahu"].sec
-      );
-      planetAbs = (rAbs + 180) % 360;
-    }
+    if(p === "Ketu" && RAHU_ABS_CURRENT !== null){
+  planetAbs = (RAHU_ABS_CURRENT + 180) % 360;
+}
 
     /* =====================================================
        FROM ALP (PLANET ITSELF — KP / VEDIC)
@@ -817,15 +899,9 @@ if(starLord && data[starLord]?.sign){
     +data[starLord].sec
   );
 
-  if(starLord === "Ketu" && data["Rahu"]?.sign){
-    const rAbs = absDeg(
-      data["Rahu"].sign,
-      +data["Rahu"].deg,
-      +data["Rahu"].min,
-      +data["Rahu"].sec
-    );
-    lordAbs = (rAbs + 180) % 360;
-  }
+ if(starLord === "Ketu" && RAHU_ABS_CURRENT !== null){
+  lordAbs = (RAHU_ABS_CURRENT + 180) % 360;
+}
 
   /* 🔥 ALWAYS USE LIVE KP / VEDIC LOGIC */
   fromALP_Star = getHouseFromALP(lordAbs);
@@ -1201,6 +1277,49 @@ function absDeg(sign,deg,min,sec=0){
   return SIGNS.indexOf(sign)*30 + deg + min/60 + sec/3600;
 }
 
+
+
+/* =========================================================
+   MASTER NODE ABSOLUTE LONGITUDE (SINGLE SOURCE OF TRUTH)
+   Ensures Rahu & Ketu always perfectly opposite everywhere
+   ========================================================= */
+function getPlanetAbs(p){
+
+  if(!data[p]?.sign) return null;
+
+  /* ---- RAHU ---- */
+  if(p === "Rahu"){
+    return absDeg(
+      data.Rahu.sign,
+      +data.Rahu.deg,
+      +data.Rahu.min,
+      +data.Rahu.sec
+    );
+  }
+
+  /* ---- KETU ALWAYS FROM RAHU ---- */
+  if(p === "Ketu" && data.Rahu?.sign){
+    const rAbs = absDeg(
+      data.Rahu.sign,
+      +data.Rahu.deg,
+      +data.Rahu.min,
+      +data.Rahu.sec
+    );
+    return (rAbs + 180) % 360;
+  }
+
+  /* ---- NORMAL PLANETS ---- */
+  return absDeg(
+    data[p].sign,
+    +data[p].deg,
+    +data[p].min,
+    +data[p].sec
+  );
+}
+
+
+
+
 let manualALPAbs=null;
 let __ALP_LAGNA_MANUAL__ = false;
 
@@ -1388,10 +1507,19 @@ function getAspect(diff){
   return "";
 }
 
+
+
+
+
+
+
 /* ================== RECALC (FIXED WEST ASP LOGIC) ================== */
 
 function recalc(){
-  if(!dob.value||!transitDate.value||!birthSign.value||birthDeg.value==="")return;
+
+  if(!dob.value || !transitDate.value || !birthSign.value || birthDeg.value==="") return;
+
+  /* ========= CORE ALP CALC ========= */
 
   const alpAbs = computeALPAbs();
   const birthAbs = absDeg(birthSign.value,+birthDeg.value,+birthMin.value);
@@ -1409,71 +1537,61 @@ function recalc(){
   diff_ALP.textContent=diffBirth.toFixed(2)+"°";
   aspect_ALP.textContent=getAspect(diffBirth);
 
+  const hs = document.querySelector('input[name="houseSystem"]:checked')?.value || "KP";
+  const westAsp=document.getElementById("westAspectToggle").checked;
 
+  PLANETS.forEach(p=>{
+    if(p==="ALP"||!data[p].sign)return;
 
+    let pAbs = getPlanetAbs(p);
+    if(pAbs === null) return;
 
+    const rawDiff = (pAbs - alpAbs + 360) % 360;
 
-const hs = document.querySelector(
-  'input[name="houseSystem"]:checked'
-)?.value === "KP" ? "KP" : "VEDIC";
+    let house;
+    if(hs === "KP"){
+      house = Math.floor(rawDiff / 30) + 1;
+    }else{
+      house = Math.floor((rawDiff + 15) / 30) + 1;
+    }
 
-const westAsp=document.getElementById("westAspectToggle").checked;
+    if(house > 12) house -= 12;
 
-PLANETS.forEach(p=>{
-  if(p==="ALP"||!data[p].sign)return;
+    document.getElementById("house_"+p).textContent = house;
 
-  let pAbs = absDeg(
-    data[p].sign,
-    +data[p].deg,
-    +data[p].min,
-    +data[p].sec
-  );
+    let showDiff = rawDiff;
+    if(westAsp && showDiff > 181 && showDiff <= 359){
+      showDiff = Math.abs(showDiff - 180);
+    }
 
-  /* FORCE RAHU–KETU OPPOSITION */
-  if(p==="Ketu" && data["Rahu"].sign){
-    const rAbs = absDeg(
-      data["Rahu"].sign,
-      +data["Rahu"].deg,
-      +data["Rahu"].min,
-      +data["Rahu"].sec
-    );
-    pAbs = (rAbs + 180) % 360;
-  }
+    document.getElementById("diff_"+p).textContent = showDiff.toFixed(2)+"°";
+    document.getElementById("aspect_"+p).textContent = getAspect(showDiff);
+  });
 
-  /* PURE ANGULAR DISTANCE (DO NOT TOUCH) */
-  const rawDiff = (pAbs - alpAbs + 360) % 360;
-
-  /* ✅ CORRECT KP / VEDIC HOUSE LOGIC */
-  let house;
-  if(hs === "KP"){
-    house = Math.floor(rawDiff / 30) + 1;
-  }else{
-    house = Math.floor((rawDiff + 15) / 30) + 1;
-  }
-
-  if(house > 12) house -= 12;
-
-  document.getElementById("house_"+p).textContent = house;
-
-  /* DISPLAY DEGREE DIFF ONLY */
-  let showDiff = rawDiff;
-  if(westAsp && showDiff > 181 && showDiff <= 359){
-    showDiff = Math.abs(showDiff - 180);
-  }
-
-  document.getElementById("diff_"+p).textContent = showDiff.toFixed(2)+"°";
-  document.getElementById("aspect_"+p).textContent = getAspect(showDiff);
-});
-
-
-
-
-
-
-
+  /* ========= ALL SYSTEM BUILDERS ========= */
 
   buildALPNakshatraTable(alpAbs);
+  buildTable2();
+  buildKundaliLordsTable3();
+  buildRahuKetuTable();
+  buildTable3();
+  buildRasiDateTable();
+  buildNakshatraPadaTable();
+
+  computeUnTenanted();
+  computeOwnStarSub();
+  computeStarExchange();
+  applyStoredHighlights();
+  syncALPLagnaLord();
+  applyPlanetLegends();
+  updateCurrentAge();
 }
+
+
+
+
+
+
 
 /* ================== INIT ================== */
 
@@ -2274,8 +2392,29 @@ function buildRahuKetuTable(){
 
     if(!data[node]?.sign) return;
 
-    const zodiacSign = data[node].sign;
-    const dispositor = SIGN_LORD_SIMPLE[zodiacSign] || "";
+    /* 🔥 ALWAYS DERIVE SIGN FROM MASTER NODE ABS */
+	let nodeAbsReal;
+
+	if(node === "Rahu" && RAHU_ABS_CURRENT !== null){
+	  nodeAbsReal = RAHU_ABS_CURRENT;
+
+	}else if(node === "Ketu" && RAHU_ABS_CURRENT !== null){
+	  nodeAbsReal = (RAHU_ABS_CURRENT + 180) % 360;
+
+	}else{
+	  nodeAbsReal = absDeg(
+		data[node].sign,
+		+data[node].deg,
+		+data[node].min,
+		+data[node].sec
+	  );
+	}
+
+	const zodiacSign = SIGNS[Math.floor(nodeAbsReal / 30)];
+	const dispositor = SIGN_LORD_SIMPLE[zodiacSign] || "";
+
+
+
 
     /* --- Absolute position of node --- */
     let nodeAbs = absDeg(
@@ -2286,15 +2425,9 @@ function buildRahuKetuTable(){
     );
 
     /* --- KP RULE : Ketu always opposite Rahu --- */
-    if(node === "Ketu" && data["Rahu"]?.sign){
-      const rAbs = absDeg(
-        data["Rahu"].sign,
-        +data["Rahu"].deg,
-        +data["Rahu"].min,
-        +data["Rahu"].sec
-      );
-      nodeAbs = (rAbs + 180) % 360;
-    }
+    if(node === "Ketu" && RAHU_ABS_CURRENT !== null){
+  nodeAbs = (RAHU_ABS_CURRENT + 180) % 360;
+}
 
     /* --- FROM ALP (DIRECT NODE → ALP DISTANCE) --- */
     const fromALP = getHouseFromALP_RK(nodeAbs);
@@ -2455,13 +2588,8 @@ function getAspectHousesT3(planet, placed){
    PART 5.2 : KP STAR / SUB / STAR-OF-SUB
    ========================================================= */
 function getStarLordT3(p){
-  if(!data[p]?.sign) return "";
-	  const abs = absDeg(
-	  data[p].sign,
-	  +data[p].deg,
-	  +data[p].min,
-	  +data[p].sec
-	);
+  const abs = getPlanetAbs(p);
+  if(abs === null) return "";
 
   const ni  = Math.floor(abs / (360/27));
   return LORD_MAP[NAKSHATRAS[ni][1]];
@@ -2469,17 +2597,24 @@ function getStarLordT3(p){
 
 
 
-
 /* ================== KP SUB LORD (PROPORTIONAL – FINAL CORRECT) ================== */
 function getSubLordT3(p){
   if(!data[p]?.sign) return "";
 
-  const abs = absDeg(
+  let abs;
+
+if(p === "Rahu" && RAHU_ABS_CURRENT !== null){
+  abs = RAHU_ABS_CURRENT;
+}else if(p === "Ketu" && RAHU_ABS_CURRENT !== null){
+  abs = (RAHU_ABS_CURRENT + 180) % 360;
+}else{
+  abs = absDeg(
     data[p].sign,
     +data[p].deg,
     +data[p].min,
     +data[p].sec
   );
+}
 
   const NAK_SIZE = 360 / 27;
   const nakIndex = Math.floor(abs / NAK_SIZE);
@@ -2518,27 +2653,186 @@ function getSubLordT3(p){
 }
 
 
+
+
+
+
+
+/* =========================================================
+   KP LEVEL LORD (TRUE RECURSIVE KP CALCULATION)
+   level = 1 → Sub
+   level = 2 → Sub-Sub
+   level = 3 → Sub-Sub-Sub ...
+   ========================================================= */
+function getKPLordFromAbs(abs, level){
+
+  if(level <= 0) return "";
+
+  const NAK_SIZE = 360 / 27;
+
+  const ORDER = [
+    {p:"Ketu", y:7},
+    {p:"Shukra", y:20},
+    {p:"Surya", y:6},
+    {p:"Chandra", y:10},
+    {p:"Mangala", y:7},
+    {p:"Rahu", y:18},
+    {p:"Guru", y:16},
+    {p:"Shani", y:19},
+    {p:"Budha", y:17}
+  ];
+
+  /* ---------- NAKSHATRA ---------- */
+  const nakIndex = Math.floor(abs / NAK_SIZE);
+  const nakStart = nakIndex * NAK_SIZE;
+
+  let spanStart = nakStart;
+  let spanSize  = NAK_SIZE;
+
+  let lord =
+    LORD_MAP[NAKSHATRAS[nakIndex][1]];
+
+  /* ---------- DESCEND LEVELS ---------- */
+  for(let L=1; L<=level; L++){
+
+    const startIndex =
+      ORDER.findIndex(o=>o.p===lord);
+
+    const seq =
+      ORDER.slice(startIndex)
+      .concat(ORDER.slice(0,startIndex));
+
+    const offset = abs - spanStart;
+
+    let acc = 0;
+
+    for(const o of seq){
+
+      const part = (o.y / 120) * spanSize;
+
+      if(offset <= acc + part + 1e-9){
+        lord = o.p;
+
+        /* NEW SUB SPAN */
+        spanStart = spanStart + acc;
+        spanSize  = part;
+        break;
+      }
+
+      acc += part;
+    }
+  }
+
+  return lord;
+}
+
+
+
+
+
+/* =========================================================
+   KP SUB LORD FROM ABS DEG (FOR DEEP LEVELS)
+   ========================================================= */
+function getSubLordFromAbs(abs){
+
+  const NAK_SIZE = 360 / 27;
+  const nakIndex = Math.floor(abs / NAK_SIZE);
+  const nakStart = nakIndex * NAK_SIZE;
+  const offset   = abs - nakStart;
+
+  const starLord = LORD_MAP[NAKSHATRAS[nakIndex][1]];
+
+  const ORDER = [
+    {p:"Ketu", y:7},
+    {p:"Shukra", y:20},
+    {p:"Surya", y:6},
+    {p:"Chandra", y:10},
+    {p:"Mangala", y:7},
+    {p:"Rahu", y:18},
+    {p:"Guru", y:16},
+    {p:"Shani", y:19},
+    {p:"Budha", y:17}
+  ];
+
+  const start = ORDER.findIndex(o=>o.p===starLord);
+  const seq = ORDER.slice(start).concat(ORDER.slice(0,start));
+
+  let acc = 0;
+  for(const o of seq){
+    const span = (o.y / 120) * NAK_SIZE;
+    acc += span;
+    if(offset <= acc + 1e-9){
+      return o.p;
+    }
+  }
+
+  return "";
+}
+
+
+
+
+
 /* =========================================================
    PART 5.3 : BUILD ONE PLANET BOX
    ========================================================= */
+
+
+
 function buildPlanetBoxT3(planet){
+
+let abs = null;
+
+/* 🔥 ABSOLUTE SOURCE OF TRUTH */
+if(planet === "Rahu"){
+  abs = RAHU_ABS_CURRENT;
+
+}else if(planet === "Ketu"){
+  abs = RAHU_ABS_CURRENT !== null
+        ? (RAHU_ABS_CURRENT + 180) % 360
+        : null;
+
+}else if(data[planet]?.sign){
+
+  abs = absDeg(
+    data[planet].sign,
+    +data[planet].deg,
+    +data[planet].min,
+    +data[planet].sec
+  );
+}
+
+  /* ===== TRUE KP HIERARCHY ===== */
+  const starLord = getStarLordT3(planet);
+
+  const subLord =
+    abs!==null ? getKPLordFromAbs(abs,1) : "";
+
+  const subSubLord =
+    abs!==null ? getKPLordFromAbs(abs,2) : "";
+
+  const starOfSub =
+    subLord ? getStarLordT3(subLord) : "";
+
+  const starOfSubSub =
+    subSubLord ? getStarLordT3(subSubLord) : "";
 
   const chain = [
     {k:"Planet", p:planet},
-    {k:"Star Lord", p:getStarLordT3(planet)},
-    {k:"Sub Lord", p:getSubLordT3(planet)},
-    {k:"Star of Sub Lord", p:getStarLordT3(getSubLordT3(planet))}
+    {k:"Star Lord", p:starLord},
+    {k:"Sub Lord", p:subLord},
+    {k:"Star of Sub Lord", p:starOfSub},
+    {k:"Sub-Sub Lord", p:subSubLord},
+    {k:"Star of Sub-Sub Lord", p:starOfSubSub}
   ];
 
   let html = `
   <table style="margin-bottom:26px;">
     <tr>
-      <th colspan="7" style="
-        font-size:20px;
-        padding:12px;
-        background:linear-gradient(180deg,#2a0f0f,#140707);
-        color:#ff9f1c;
-        border-bottom:2px solid #a86b17;">
+      <th colspan="7"
+          style="font-size:20px;padding:12px;
+          background:linear-gradient(180deg,#2a0f0f,#140707);
+          color:#ff9f1c;border-bottom:2px solid #a86b17;">
         ${planet}
       </th>
     </tr>
@@ -2554,53 +2848,62 @@ function buildPlanetBoxT3(planet){
   `;
 
   chain.forEach(r=>{
+
     if(!r.p) return;
 
-    const lords   = getLordsOfPlanetFromALP(r.p);
-			let placed = 0;
+    const lords = getLordsOfPlanetFromALP(r.p);
 
-		if(data[r.p]?.sign){
-		  let abs = absDeg(
-			data[r.p].sign,
-			+data[r.p].deg,
-			+data[r.p].min,
-			+data[r.p].sec
-		  );
+    let placed = 0;
 
-		  if(r.p === "Ketu" && data["Rahu"]?.sign){
-			const rAbs = absDeg(
-			  data["Rahu"].sign,
-			  +data["Rahu"].deg,
-			  +data["Rahu"].min,
-			  +data["Rahu"].sec
-			);
-			abs = (rAbs + 180) % 360;
-		  }
+    if(data[r.p]?.sign){
 
-		  /* 🔥 LIVE KP / VEDIC */
-		  placed = getHouseFromALP(abs);
-		}
+      let abs2 = absDeg(
+        data[r.p].sign,
+        +data[r.p].deg,
+        +data[r.p].min,
+        +data[r.p].sec
+      );
 
+      /* KP RULE : KETU OPPOSITE RAHU */
+      if(r.p==="Ketu" && RAHU_ABS_CURRENT !== null){
+	  abs2 = (RAHU_ABS_CURRENT + 180) % 360;
+	}
 
-    const finalV  = [...new Set([...lords, placed].filter(Boolean))].sort((a,b)=>a-b);
-    const aspects = getAspectHousesT3(r.p, placed);
-    const sum     = [...new Set([...finalV, ...aspects])].sort((a,b)=>a-b);
+      placed = getHouseFromALP(abs2);
+    }
+
+    const finalV =
+      [...new Set([...lords, placed].filter(Boolean))]
+      .sort((a,b)=>a-b);
+
+    const aspects =
+      getAspectHousesT3(r.p, placed);
+
+    const sum =
+      [...new Set([...finalV, ...aspects])]
+      .sort((a,b)=>a-b);
 
     html += `
-    <tr>
-      <td>${r.k}</td>
-      <td>${r.p}</td>
-      <td>${lords.join(",")}</td>
-      <td>${placed || ""}</td>
-      <td>${finalV.join(",")}</td>
-      <td>${aspects.join(",")}</td>
-      <td>${sum.join(",")}</td>
-    </tr>`;
+      <tr>
+        <td>${r.k}</td>
+        <td>${r.p}</td>
+        <td>${lords.join(",")}</td>
+        <td>${placed || ""}</td>
+        <td>${finalV.join(",")}</td>
+        <td>${aspects.join(",")}</td>
+        <td>${sum.join(",")}</td>
+      </tr>`;
   });
 
   html += `</table>`;
   return html;
 }
+
+
+
+
+
+
 
 /* =========================================================
    PART 5.4 : BUILD TABLE-3 (9 PLANET BOXES)
@@ -3321,6 +3624,102 @@ const SWISS_TO_INTERNAL_PLANET_MAP = {
   Shukra: "Shukra",
   Shani: "Shani"
 };
+
+
+
+
+
+
+
+/* =========================================================
+   GLOBAL NODE STORAGE (PERSISTENT)
+   ========================================================= */
+let NODE_MODE = "MEAN";
+let TRUE_NODE_ABS = null;
+let MEAN_NODE_ABS = null;
+
+/* 🔥 MASTER ABSOLUTE LONGITUDE (NO ROUNDING EVER) */
+let RAHU_ABS_CURRENT = null;
+
+
+
+
+
+/* APPLY CURRENT NODE MODE */
+function applySelectedNode(){
+
+  const nodeAbs =
+    NODE_MODE === "MEAN"
+      ? MEAN_NODE_ABS
+      : TRUE_NODE_ABS;
+
+  if(nodeAbs === null) return;
+
+  /* 🔥 STORE ABSOLUTE — NEVER LOSE PRECISION */
+  RAHU_ABS_CURRENT = nodeAbs;
+
+  /* ---------- DISPLAY RAHU ---------- */
+  const r = nodeAbs % 360;
+  const rSignIndex = Math.floor(r / 30);
+  const rDegFloat  = r % 30;
+
+  data.Rahu.sign = SIGNS[rSignIndex];
+  data.Rahu.deg  = Math.floor(rDegFloat);
+  data.Rahu.min  = Math.floor((rDegFloat - data.Rahu.deg) * 60);
+  data.Rahu.sec  = Math.round(
+    (((rDegFloat - data.Rahu.deg) * 60) - data.Rahu.min) * 60
+  );
+
+  /* ---------- COMPUTE KETU FROM ABS ---------- */
+  const kAbs = (nodeAbs + 180) % 360;
+  const kSignIndex = Math.floor(kAbs / 30);
+  const kDegFloat  = kAbs % 30;
+
+  data.Ketu.sign = SIGNS[kSignIndex];
+  data.Ketu.deg  = Math.floor(kDegFloat);
+  data.Ketu.min  = Math.floor((kDegFloat - data.Ketu.deg) * 60);
+  data.Ketu.sec  = Math.round(
+    (((kDegFloat - data.Ketu.deg) * 60) - data.Ketu.min) * 60
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+/* RADIO SWITCH = APPLY NODE */
+document
+  .querySelectorAll('input[name="nodeMode"]')
+  .forEach(r=>{
+    r.addEventListener("change", function(){
+
+      NODE_MODE = this.value;
+
+      
+	  
+	  
+	  applySelectedNode();
+		buildTable();
+
+		/* FULL SYSTEM REBUILD */
+		setTimeout(()=>{
+		  recalc();
+		  buildTable2();
+		  buildKundaliLordsTable3();
+		  buildRahuKetuTable();
+		  buildTable3();   // 🔥 THIS FIXES TABLE-5
+		},0);
+    });
+  });
+  
+  
+  
 </script>
 
 
@@ -3340,7 +3739,7 @@ const SWISS_TO_INTERNAL_PLANET_MAP = {
    - Planet name normalization
    ========================================================= */
 
-loadSwissBtn.onclick = ()=> swissFileInput.click();
+
 
 swissFileInput.onchange = e=>{
   const reader = new FileReader();
@@ -3414,41 +3813,97 @@ swissFileInput.onchange = e=>{
         data[p].sec  = 0;
       });
 
-      Object.entries(json.planets).forEach(([rawName, absVal])=>{
 
-        const internal = SWISS_TO_INTERNAL_PLANET_MAP[rawName];
-        if(!internal || !data[internal]) return;
 
-        const abs = ((absVal % 360) + 360) % 360;
 
-        const sIdx = Math.floor(abs / 30);
-        const deg  = Math.floor(abs % 30);
-        const min  = Math.floor(((abs % 30) - deg) * 60);
-        const sec  = Math.round(
-          ((((abs % 30) - deg) * 60) - min) * 60
-        );
 
-        data[internal].sign = SIGNS[sIdx];
-        data[internal].deg  = deg;
-        data[internal].min  = min;
-        data[internal].sec  = sec;
-      });
 
-      /* FORCE RAHU–KETU OPPOSITION */
-      if(data.Rahu.sign){
-        const rAbs = absDeg(
-          data.Rahu.sign,
-          +data.Rahu.deg,
-          +data.Rahu.min,
-          +data.Rahu.sec
-        );
-        const kAbs = (rAbs + 180) % 360;
 
-        data.Ketu.sign = SIGNS[Math.floor(kAbs / 30)];
-        data.Ketu.deg  = Math.floor(kAbs % 30);
-        data.Ketu.min  = Math.floor(((kAbs % 30) - data.Ketu.deg) * 60);
-        data.Ketu.sec  = 0;
-      }
+
+
+
+
+
+
+
+/* =====================================================
+   RESET NODE STORAGE (CRITICAL FIX)
+   ===================================================== */
+
+	TRUE_NODE_ABS = null;
+	MEAN_NODE_ABS = null;
+	RAHU_ABS_CURRENT = null;
+
+	/* =====================================================
+	   STORE BOTH TRUE & MEAN NODE FROM SWISS (GLOBAL)
+	   ===================================================== */
+
+	Object.entries(json.planets).forEach(([rawName, absVal])=>{
+
+	  const nameLower = rawName.toLowerCase();
+	  const abs = ((absVal % 360) + 360) % 360;
+
+
+
+
+	  /* ---------- detect TRUE node ---------- */
+	  if(rawName === "Rahu"){
+	  MEAN_NODE_ABS = abs;
+	  return;
+	}
+
+	if(rawName === "Rahu_true"){
+	  TRUE_NODE_ABS = abs;
+	  return;
+	}
+
+	  /* ---------- normal planets ---------- */
+	  const internal = SWISS_TO_INTERNAL_PLANET_MAP[rawName];
+	  if(!internal || !data[internal]) return;
+
+	  const sIdx = Math.floor(abs / 30);
+	  const deg  = Math.floor(abs % 30);
+	  const min  = Math.floor(((abs % 30) - deg) * 60);
+	  const sec  = Math.round(
+		((((abs % 30) - deg) * 60) - min) * 60
+	  );
+
+	  data[internal].sign = SIGNS[sIdx];
+	  data[internal].deg  = deg;
+	  data[internal].min  = min;
+	  data[internal].sec  = sec;
+	});
+
+	/* =====================================================
+	   APPLY CURRENT RADIO SELECTION (SAFE FALLBACK)
+	   ===================================================== */
+
+	const selectedNodeRadio =
+	  document.querySelector('input[name="nodeMode"]:checked');
+
+	if(selectedNodeRadio){
+	  NODE_MODE = selectedNodeRadio.value;
+	}
+
+	/* If selected node type missing → fallback safely */
+	if(NODE_MODE === "TRUE" && TRUE_NODE_ABS === null){
+	  NODE_MODE = "MEAN";
+	}
+	if(NODE_MODE === "MEAN" && MEAN_NODE_ABS === null){
+	  NODE_MODE = "TRUE";
+	}
+
+	applySelectedNode();
+
+
+
+
+
+
+	  
+	  
+
+    
     }
 
     /* ================= FINAL APPLY ================= */
@@ -3504,20 +3959,6 @@ swissFileInput.onchange = e=>{
 
 
 
-<script>
-/* =========================================================
-   QUICK NAV — ID BASED (EXACT TARGETING)
-   ========================================================= */
-function jumpTo(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  el.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-</script>
 
 
 
@@ -3525,20 +3966,6 @@ function jumpTo(id){
 
 
 
-<script>
-/* =========================================================
-   QUICK NAV — EXACT ID SCROLL (NEW)
-   ========================================================= */
-function jumpTo(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-
-  el.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-</script>
 
 
 
@@ -3546,20 +3973,7 @@ function jumpTo(id){
 
 
 
-<script>
-/* =========================================================
-   QUICK NAV — SINGLE SOURCE OF TRUTH (FINAL)
-   ========================================================= */
-function jumpTo(id){
-  const el = document.getElementById(id);
-  if(!el) return;
 
-  el.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-</script>
 
 
 
@@ -3578,6 +3992,62 @@ function resetToToday(){
 
 
 
+
+<script>
+/* =========================================================
+   TABLE-1 COLLAPSE TOGGLE (FINAL STABLE)
+   ========================================================= */
+
+(function(){
+
+  const wrapper = document.getElementById("table1ContentWrapper");
+  const heading = document.getElementById("table-1");
+
+  if(!wrapper || !heading) return;
+
+  /* click heading */
+  heading.addEventListener("click", ()=>{
+    wrapper.classList.toggle("collapsed");
+  });
+
+})();
+
+
+/* =========================================================
+   LOAD SWISS TOP BUTTON → SAFE BRIDGE
+   ========================================================= */
+
+(function(){
+
+  const topBtn   = document.getElementById("loadSwissTopBtn");
+  const fileInput= document.getElementById("swissFileInput");
+
+  if(!topBtn || !fileInput) return;
+
+  topBtn.addEventListener("click", ()=>{
+    fileInput.click();
+  });
+
+})();
+</script>
+
+
+<script>
+/* =========================================================
+   QUICK NAV — SINGLE CLEAN VERSION (FINAL FIX)
+   ========================================================= */
+function jumpTo(id){
+
+  const el = document.getElementById(id);
+  if(!el) return;
+
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+}
+</script>
 
 
 
