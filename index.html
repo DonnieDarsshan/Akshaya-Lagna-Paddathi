@@ -523,10 +523,83 @@ input[type="radio"]{
   letter-spacing:1px;
 }
 
+
+
+
+/* =========================================================
+   REMOVE GLOW FROM RASI / PADA CHANGER + SUMMARY BAR
+   ========================================================= */
+
+/* Rasi / Pada changer dates */
+.alp-dates{
+  text-shadow:none !important;
+}
+
+/* Rasi / Pada labels */
+.alp-label{
+  text-shadow:none !important;
+}
+
+/* Good / Bad summary bar text */
+.house-summary-good,
+.house-summary-bad{
+  text-shadow:none !important;
+}
+
+
+
+
+
+
 .load-swiss-ephemeris:hover{
   background:linear-gradient(135deg,#fde047,#fef08a);
   box-shadow:0 0 14px rgba(250,204,21,.65);
 }
+
+
+
+
+
+
+
+/* =========================================================
+   GOOD / BAD HOUSE SUMMARY BAR
+   ========================================================= */
+.house-summary-bar{
+  margin-top:12px;
+  padding:10px 16px;
+
+  border-radius:10px;
+  border:1px solid #334155;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(2,6,23,0.95),
+      rgba(2,6,23,0.75)
+    );
+
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  flex-wrap:wrap;
+
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.house-summary-good{
+  color:#86efac;
+  text-shadow:0 0 8px rgba(134,239,172,.6);
+}
+
+.house-summary-bad{
+  color:#fca5a5;
+  text-shadow:0 0 8px rgba(252,165,165,.6);
+}
+
+
+
 
 
 
@@ -598,7 +671,7 @@ input[type="radio"]{
     </label>
 	
 	<label class="west-box">
-	  <input type="checkbox" id="signOnlyBhavaToggle" >
+	  <input type="checkbox" id="signOnlyBhavaToggle" checked>
 	  Sign2Sign
 	</label>
 	
@@ -987,6 +1060,7 @@ TABLE-3 : ALP NAKSHATRA & BHAVA ANALYSIS
   <th>House from ALP</th>
   <th>Lords of ALP</th>
   <th>From Its Bhava</th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody id="alpNakshatraBody"></tbody>
@@ -1024,7 +1098,10 @@ TABLE-3 : ALP NAKSHATRA & BHAVA ANALYSIS
 </div>
 
 
-
+<div id="table3SummaryBar" class="house-summary-bar">
+  <div class="house-summary-good">GOOD : —</div>
+  <div class="house-summary-bad">BAD : —</div>
+</div>
 
 
 
@@ -1058,6 +1135,7 @@ TABLE-4 : KUNDALI LORDS FROM ALP
   <th>Lords of ALP</th>
   <th>From ALP</th>
   <th>From Its Bhava</th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody id="kundaliTable3Body"></tbody>
@@ -1065,7 +1143,10 @@ TABLE-4 : KUNDALI LORDS FROM ALP
 
 
 
-
+<div id="table4SummaryBar" class="house-summary-bar">
+  <div class="house-summary-good">GOOD : —</div>
+  <div class="house-summary-bad">BAD : —</div>
+</div>
 
 
 
@@ -1158,7 +1239,7 @@ function getPlanetLegendSuffix(planet){
 
   if(PLANET_UNTENANTED[planet])     out += " $";
   if(PLANET_OWN_STAR_SUB[planet])   out += " %";
-  if(PLANET_RETRO[planet])          out += " (R)";
+  if(PLANET_RETRO[planet])          out += " ℞";
   if(PLANET_STAR_EXCHANGE[planet])  out += " #";
 
   return out;
@@ -1575,6 +1656,8 @@ function recalc(){
   buildKundaliLordsTable3();
   buildRahuKetuTable();
   buildTable3();
+  updateHouseSummary("alpNakshatraBody","table3SummaryBar");
+  updateHouseSummary("kundaliTable3Body","table4SummaryBar");
   buildRasiDateTable();
   buildNakshatraPadaTable();
 
@@ -1825,6 +1908,7 @@ if(placedHouse){
         <td>${placedHouse}</td>
         <td>${lordsOf}</td>
 		<td>${fromItsBhava}</td>
+		<td>${getLordshipResult(h, fromItsBhava)}</td>
       </tr>
     `;
   }
@@ -2188,6 +2272,79 @@ const SIGN_LORD_SIMPLE = {
   Sagittarius:"Guru", Capricorn:"Shani", Aquarius:"Shani", Pisces:"Guru"
 };
 
+
+
+
+
+
+/* ======================================================
+   SIMPLE RESULT RULE (GOOD / BAD ONLY)
+   ====================================================== */
+
+function getLordshipResult(lordHouse, placedHouse){
+
+  if(!placedHouse) return "";
+
+  /* Bad houses */
+  const BAD = [6,8,10,12];
+
+  if(BAD.includes(placedHouse)){
+    return "Bad";
+  }
+
+  return "Good";
+}
+
+
+
+
+/* =========================================================
+   SUMMARY COUNTER (GOOD / BAD HOUSES)
+   ========================================================= */
+
+function updateHouseSummary(tableBodyId, barId){
+
+  const body = document.getElementById(tableBodyId);
+  const bar  = document.getElementById(barId);
+
+  if(!body || !bar) return;
+
+  const rows = body.querySelectorAll("tr");
+
+  const good = [];
+  const bad  = [];
+
+  rows.forEach(r=>{
+
+    const house = Number(r.children[0]?.textContent);
+    const result = r.children[6]?.textContent?.trim();
+
+    if(!house) return;
+
+    if(result === "Good"){
+      good.push(house);
+    }
+    if(result === "Bad"){
+      bad.push(house);
+    }
+
+  });
+
+  const goodText = good.sort((a,b)=>a-b).join(",");
+  const badText  = bad.sort((a,b)=>a-b).join(",");
+
+  bar.querySelector(".house-summary-good").textContent =
+    "GOOD : " + (goodText || "—");
+
+  bar.querySelector(".house-summary-bad").textContent =
+    "BAD : " + (badText || "—");
+}
+
+
+
+
+
+
 function getHouseFromALP(abs){
   const alpAbs = computeALPAbs();
   const rawDiff = (abs - alpAbs + 360) % 360;
@@ -2282,6 +2439,7 @@ function buildKundaliLordsTable3(){
         <td>${lordsOfALP}</td>
         <td>${fromALP}</td>
         <td>${fromItsBhava}</td>
+		<td>${getLordshipResult(h, fromItsBhava)}</td>
       </tr>
     `;
   }
