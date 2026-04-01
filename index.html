@@ -2216,6 +2216,30 @@ fileInput.onchange = e=>{
   r.onload=()=>{
     const o=JSON.parse(r.result);
 
+    /* === RESET ALL TOGGLES & DROPDOWNS TO DEFAULT === */
+    document.getElementById("stepSelect").value = "30";
+    if(document.getElementById("alpLagnaLord")) {
+        document.getElementById("alpLagnaLord").value = "";
+        document.getElementById("alpLagnaLord").disabled = true;
+    }
+    if(document.getElementById("table5SortPlanet")) document.getElementById("table5SortPlanet").value = "";
+    if(document.getElementById("expandLevel")) document.getElementById("expandLevel").value = "2";
+    
+    if(document.getElementById("westAspectToggle")) document.getElementById("westAspectToggle").checked = false;
+    if(document.getElementById("signOnlyBhavaToggle")) document.getElementById("signOnlyBhavaToggle").checked = true;
+    if(document.getElementById("alpLordshipToggle")) document.getElementById("alpLordshipToggle").checked = false;
+    if(document.getElementById("modeDateHide")) document.getElementById("modeDateHide").checked = true;
+    if(document.getElementById("modeKN")) document.getElementById("modeKN").checked = true;
+    
+    const kpRadio = document.querySelector('input[name="houseSystem"][value="KP"]');
+    if(kpRadio) kpRadio.checked = true;
+    
+    const meanRadio = document.querySelector('input[name="nodeMode"][value="MEAN"]');
+    if(meanRadio) meanRadio.checked = true;
+    if(typeof NODE_MODE !== 'undefined') NODE_MODE = "MEAN";
+    if(typeof __ALP_LAGNA_MANUAL__ !== 'undefined') __ALP_LAGNA_MANUAL__ = false;
+    /* ================================================ */
+
     dob.value=o.dob||"";
     transitDate.value=o.transit||"";
     birthSign.value=o.birth?.sign||"";
@@ -4059,13 +4083,31 @@ swissFileInput.onchange = e=>{
   const reader = new FileReader();
 
   reader.onload = ()=>{
-  
-  
-  
-  
 
-  
-  
+    /* === RESET ALL TOGGLES & DROPDOWNS TO DEFAULT === */
+    document.getElementById("stepSelect").value = "30";
+    if(document.getElementById("alpLagnaLord")) {
+        document.getElementById("alpLagnaLord").value = "";
+        document.getElementById("alpLagnaLord").disabled = true;
+    }
+    if(document.getElementById("table5SortPlanet")) document.getElementById("table5SortPlanet").value = "";
+    if(document.getElementById("expandLevel")) document.getElementById("expandLevel").value = "2";
+    
+    if(document.getElementById("westAspectToggle")) document.getElementById("westAspectToggle").checked = false;
+    if(document.getElementById("signOnlyBhavaToggle")) document.getElementById("signOnlyBhavaToggle").checked = true;
+    if(document.getElementById("alpLordshipToggle")) document.getElementById("alpLordshipToggle").checked = false;
+    if(document.getElementById("modeDateHide")) document.getElementById("modeDateHide").checked = true;
+    if(document.getElementById("modeKN")) document.getElementById("modeKN").checked = true;
+    
+    const kpRadio = document.querySelector('input[name="houseSystem"][value="KP"]');
+    if(kpRadio) kpRadio.checked = true;
+    
+    const meanRadio = document.querySelector('input[name="nodeMode"][value="MEAN"]');
+    if(meanRadio) meanRadio.checked = true;
+    if(typeof NODE_MODE !== 'undefined') NODE_MODE = "MEAN";
+    if(typeof __ALP_LAGNA_MANUAL__ !== 'undefined') __ALP_LAGNA_MANUAL__ = false;
+    /* ================================================ */
+
     let json;
     try{
       json = JSON.parse(reader.result);
