@@ -768,18 +768,16 @@ input[type="radio"]{
     <button id="prevBtn">◀</button>
     <button id="nextBtn">▶</button>
 
-    <label><input type="radio" name="houseSystem" value="Vedic"> Vedic</label>
-    <label><input type="radio" name="houseSystem" value="KP" checked> KP</label>
+    <div id="houseSystemGroup" style="display:flex; gap:8px;">
+      <button type="button" class="sys-btn" data-sys="Vedic">Vedic</button>
+      <button type="button" class="sys-btn" data-sys="KP">KP</button>
+      <button type="button" class="sys-btn" data-sys="Sign2Sign">Sign2Sign</button>
+    </div>
 
     <label class="west-box">
       <input type="checkbox" id="westAspectToggle">
       West Asp (−180°)
     </label>
-	
-	<label class="west-box">
-	  <input type="checkbox" id="signOnlyBhavaToggle" checked>
-	  Sign2Sign
-	</label>
 	
   </div>
 </div>
@@ -933,6 +931,955 @@ TABLE-1 : DATA INPUT TABLE
 </div>
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+  /* Collapse Header Styling */
+  #masterKundaliHeading {
+    margin-top: 40px;
+    margin-bottom: 14px;
+    text-align: center;
+    color: #facc15;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 0 12px #92400e;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s;
+  }
+  #masterKundaliHeading:hover {
+    color: #fef08a;
+    text-shadow: 0 0 20px #b45309;
+  }
+  
+  /* Wrapper for all 3 charts */
+  #masterKundaliWrapper {
+    overflow: hidden;
+    transition: max-height 0.6s ease, opacity 0.4s ease;
+    max-height: 5000px;
+    opacity: 1;
+  }
+  #masterKundaliWrapper.collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  /* Wide Rectangular Wrapper for Main Chart */
+  .grand-egyptian-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4vw; 
+    width: 100%;
+    max-width: 1400px; 
+    margin: 20px auto 40px auto;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* Wrapper for Twin Bottom Charts */
+  .twin-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 50px auto;
+  }
+
+  /* Massive Egyptian Flankers */
+  .egyptian-flank {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 500px;
+    font-size: 80px; 
+    color: #d4af37;
+    text-shadow: 0 0 25px rgba(212, 175, 55, 0.6), 0 0 10px rgba(180, 83, 9, 0.8);
+    user-select: none;
+    pointer-events: none;
+    position: sticky;
+    top: 20px; 
+  }
+
+  /* Base Kundali Grid */
+  .egyptian-kundali {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: linear-gradient(135deg, #0a0a0a 0%, #1e1305 50%, #0a0a0a 100%);
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.3), inset 0 0 30px rgba(0,0,0,0.9);
+    border-radius: 4px;
+    position: relative;
+    padding: 4px;
+    gap: 4px;
+  }
+  
+  /* Sizing for Main Chart - EXPANDABLE */
+  .main-size {
+    flex-grow: 1; 
+    width: 100%;
+    max-width: 1000px; 
+    min-height: 550px; 
+    height: auto; 
+    grid-template-rows: repeat(4, minmax(130px, auto)); 
+  }
+
+  /* ASYMMETRIC SIZING FOR TWIN CHARTS */
+  .age-size {
+    width: 90vw;
+    max-width: 420px; /* Much smaller width for tiny 2-digit numbers */
+    min-height: 450px;
+    height: auto;
+    grid-template-rows: repeat(4, minmax(110px, auto));
+  }
+
+  .year-size {
+    width: 90vw;
+    max-width: 620px; /* Much wider to comfortably fit 4-digit years (e.g., 2095 to 2105) */
+    min-height: 450px;
+    height: auto;
+    grid-template-rows: repeat(4, minmax(110px, auto));
+  }
+
+  /* Outer decorative golden border */
+  .egyptian-kundali::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: -8px; right: -8px; bottom: -8px;
+    border: 1px solid rgba(161, 98, 7, 0.8);
+    border-radius: 6px;
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(161, 98, 7, 0.4);
+  }
+
+  .rasi-box {
+    background: linear-gradient(180deg, #111827, #030712);
+    border: 1px solid #92400e;
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
+    position: relative;
+  }
+
+  .rasi-box::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .rasi-planets {
+    display: flex;
+    flex-direction: column; 
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+    z-index: 1;
+  }
+
+  /* Planet Token - Normal but Elegant Text */
+  .planet-token {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #b45309;
+    padding: 4px 10px; 
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500; 
+    color: #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+    width: 90%; 
+    text-align: center;
+    white-space: nowrap; 
+    letter-spacing: 0.5px;
+    text-shadow: none; 
+  }
+
+  .planet-token .deg-span {
+    color: #facc15; 
+    font-family: monospace;
+    font-size: 14px;
+    margin-left: 6px;
+    font-weight: 500; 
+  }
+
+  /* Dark Crimson Red ALP Token */
+  .planet-token.alp-token {
+    background: linear-gradient(135deg, #8B0000, #4A0000); 
+    color: #ffffff; 
+    border: 1px solid #facc15;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6); 
+    text-shadow: none;
+  }
+  
+  .planet-token.alp-token .deg-span { color: #fde047; } 
+
+  /* Center Hollow Section */
+  .kundali-center {
+    grid-column: 2 / 4;
+    grid-row: 2 / 4;
+    background: radial-gradient(circle, rgba(180, 83, 9, 0.1) 0%, rgba(0,0,0,0.5) 80%);
+    border: 1px dashed rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    margin: 8px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+  }
+
+  /* Text for Twin Charts (Ages & Years) - BIG AND COLORFUL! */
+  .span-text {
+    font-size: 18px; /* Big text */
+    font-weight: 900;
+    color: #ff9f1c; /* Fallback vibrant color */
+    background: linear-gradient(90deg, #facc15 0%, #ff5722 100%); 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    margin-bottom: 6px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    white-space: nowrap; 
+  }
+
+  /* Hardcoded South Indian Grid Positions */
+  .pos-Pisces      { grid-area: 1 / 1 / 2 / 2; }
+  .pos-Aries       { grid-area: 1 / 2 / 2 / 3; }
+  .pos-Taurus      { grid-area: 1 / 3 / 2 / 4; }
+  .pos-Gemini      { grid-area: 1 / 4 / 2 / 5; }
+  .pos-Cancer      { grid-area: 2 / 4 / 3 / 5; }
+  .pos-Leo         { grid-area: 3 / 4 / 4 / 5; }
+  .pos-Virgo       { grid-area: 4 / 4 / 5 / 5; }
+  .pos-Libra       { grid-area: 4 / 3 / 5 / 4; }
+  .pos-Scorpio     { grid-area: 4 / 2 / 5 / 3; }
+  .pos-Sagittarius { grid-area: 4 / 1 / 5 / 2; }
+  .pos-Capricorn   { grid-area: 3 / 1 / 4 / 2; }
+  .pos-Aquarius    { grid-area: 2 / 1 / 3 / 2; }
+</style>
+
+<h2 id="masterKundaliHeading">
+  SOUTH INDIAN KUNDALI <span id="kToggleIcon" style="font-size: 16px; margin-left: 8px;">▼</span>
+</h2>
+
+<div id="masterKundaliWrapper">
+  
+  <div class="grand-egyptian-wrapper">
+    <div class="egyptian-flank left-flank">
+        <div>𓁢</div> <div>𓂀</div> <div>𓋹</div>
+    </div>
+
+    <div class="egyptian-kundali main-size" id="southIndianKundali">
+      <div class="kundali-center"></div> 
+      
+      <div class="rasi-box pos-Pisces" id="rasi-Pisces"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aries" id="rasi-Aries"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Taurus" id="rasi-Taurus"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Gemini" id="rasi-Gemini"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Cancer" id="rasi-Cancer"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Leo" id="rasi-Leo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Virgo" id="rasi-Virgo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Libra" id="rasi-Libra"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Scorpio" id="rasi-Scorpio"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Sagittarius" id="rasi-Sagittarius"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Capricorn" id="rasi-Capricorn"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aquarius" id="rasi-Aquarius"><div class="rasi-planets"></div></div>
+    </div>
+
+    <div class="egyptian-flank right-flank">
+        <div>𓀯</div> <div>𓃠</div> <div>𓆣</div>
+    </div>
+  </div>
+
+  <div class="twin-wrapper">
+    
+    <div class="egyptian-kundali age-size" id="ageKundali">
+      <div class="kundali-center"></div> 
+      
+      <div class="rasi-box pos-Pisces" id="rasi-age-Pisces"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aries" id="rasi-age-Aries"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Taurus" id="rasi-age-Taurus"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Gemini" id="rasi-age-Gemini"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Cancer" id="rasi-age-Cancer"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Leo" id="rasi-age-Leo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Virgo" id="rasi-age-Virgo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Libra" id="rasi-age-Libra"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Scorpio" id="rasi-age-Scorpio"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Sagittarius" id="rasi-age-Sagittarius"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Capricorn" id="rasi-age-Capricorn"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aquarius" id="rasi-age-Aquarius"><div class="rasi-planets"></div></div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="egyptian-kundali year-size" id="yearKundali">
+      <div class="kundali-center"></div> 
+      
+      <div class="rasi-box pos-Pisces" id="rasi-year-Pisces"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aries" id="rasi-year-Aries"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Taurus" id="rasi-year-Taurus"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Gemini" id="rasi-year-Gemini"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Cancer" id="rasi-year-Cancer"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Leo" id="rasi-year-Leo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Virgo" id="rasi-year-Virgo"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Libra" id="rasi-year-Libra"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Scorpio" id="rasi-year-Scorpio"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Sagittarius" id="rasi-year-Sagittarius"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Capricorn" id="rasi-year-Capricorn"><div class="rasi-planets"></div></div>
+      <div class="rasi-box pos-Aquarius" id="rasi-year-Aquarius"><div class="rasi-planets"></div></div>
+    </div>
+
+  </div> 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <style>
+  /* First Row (Top Headings) - Dark Burgundy with Yellow Text */
+  #p2pTable th, #p2hTable th {
+      background: #660033 !important; 
+      color: #facc15 !important;
+      font-weight: 900;
+      cursor: pointer;
+      border: 1px solid var(--border-soft);
+      padding: 10px;
+  }
+
+  /* First Column (Planet Names) - Deep Purple */
+  #p2pTable td:first-child, #p2hTable td:first-child {
+      background: #2d0066 !important; 
+      color: #facc15 !important;
+      font-weight: 900;
+      cursor: pointer;
+      border: 1px solid var(--border-soft);
+  }
+
+  /* Hover State (Crosshair overlay) - Beautiful Golden/Saffron to match theme */
+  #vedicAspectsContainer th.vedic-hover-bg,
+  #vedicAspectsContainer td.vedic-hover-bg {
+      background: rgba(212, 175, 55, 0.35) !important; 
+  }
+
+  /* Protect the Planet Placement Cell from Hover Color changes */
+  #vedicAspectsContainer td.placement-cell,
+  #vedicAspectsContainer td.placement-cell.vedic-hover-bg {
+      background: #590F00 !important;
+      color: #ffffff !important;
+  }
+
+  /* Active State (Multi-Select Click Highlight) */
+  #vedicAspectsContainer th.vedic-active-bg,
+  #vedicAspectsContainer td.vedic-active-bg {
+      background: rgba(139, 0, 0, 0.8) !important; 
+      color: #ffffff !important;
+  }
+  
+  /* Wrapper for Table 8 Collapse */
+  #table8Wrapper {
+      overflow: hidden;
+      transition: max-height 0.45s ease, opacity 0.35s ease;
+      max-height: 8000px;
+      opacity: 1;
+  }
+  #table8Wrapper.collapsed {
+      max-height: 0;
+      opacity: 0;
+  }
+  </style>
+
+  <h2 id="table-8" style="
+    margin-top:40px;
+    margin-bottom:14px;
+    text-align:center;
+    color:#fde047;
+    font-weight:900;
+    letter-spacing:2px;
+    text-shadow:0 0 12px #92400e;
+    cursor:pointer;
+  ">
+    VEDIC ASPECTS
+  </h2>
+
+  <div id="table8Wrapper">
+    <div style="text-align:center;margin-bottom:14px;font-weight:800;color:#facc15;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+      <label>
+        <input type="checkbox" id="rkAspectsToggle" onchange="window.__lastVedicState='force';">
+        Rahu & Ketu Aspects: 3, 11 (Default is 5, 9)
+      </label>
+      <label>
+        <input type="checkbox" id="p2pBirthToggle" checked onchange="window.__lastVedicState='force';">
+        Birth
+      </label>
+    </div>
+
+    <div id="vedicAspectsContainer" style="margin-bottom: 30px;">
+      <h3 style="text-align:center; color:#d4af37; margin-top:20px; font-size: 20px;">Planet to Planet Aspects (Vedic)</h3>
+      <div style="display:flex;justify-content:center; overflow-x:auto;">
+        <table id="p2pTable" style="max-width:1200px"></table>
+      </div>
+
+      <h3 style="text-align:center; color:#d4af37; margin-top:30px; font-size: 20px;">Planet To House Aspects (Relative to ALP)</h3>
+      <div style="display:flex;justify-content:center; overflow-x:auto; margin-bottom: 20px;">
+        <table id="p2hTable" style="max-width:1200px"></table>
+      </div>
+    </div>
+  </div>
+
+</div> <script>
+/* =========================================================
+   COLLAPSE TOGGLE LOGIC
+   ========================================================= */
+document.getElementById('masterKundaliHeading').addEventListener('click', function() {
+  const wrapper = document.getElementById('masterKundaliWrapper');
+  const icon = document.getElementById('kToggleIcon');
+  wrapper.classList.toggle('collapsed');
+  icon.textContent = wrapper.classList.contains('collapsed') ? '▶' : '▼';
+});
+
+// Toggle for Table 8
+document.getElementById('table-8')?.addEventListener('click', function() {
+  document.getElementById('table8Wrapper')?.classList.toggle('collapsed');
+});
+
+/* =========================================================
+   SOUTH INDIAN KUNDALI UPDATER LOGIC (MAIN + TWINS)
+   ========================================================= */
+function updateAllKundalis() {
+    document.querySelectorAll('#southIndianKundali .rasi-planets').forEach(box => box.innerHTML = '');
+    const rasiGroups = {};
+    if (typeof SIGNS !== 'undefined') SIGNS.forEach(s => rasiGroups[s] = []);
+
+    const planetList = ["Surya", "Chandra", "Mangala", "Budha", "Guru", "Shukra", "Shani", "Rahu", "Ketu"];
+    planetList.forEach(p => {
+        if (typeof getPlanetAbs === 'function') {
+            const abs = getPlanetAbs(p);
+            if (abs !== null && !isNaN(abs)) {
+                const targetSign = SIGNS[Math.floor(abs / 30)];
+                const rawDeg = abs % 30;
+                const deg = Math.floor(rawDeg);
+                const min = Math.floor((rawDeg - deg) * 60);
+                const dStr = deg.toString();
+                const mStr = min.toString().padStart(2, '0');
+
+                let retroHtml = "";
+                if (p !== "Rahu" && p !== "Ketu" && typeof PLANET_RETRO !== 'undefined' && PLANET_RETRO[p]) {
+                    retroHtml = " <span style='color:#ef4444; font-weight:900;'>℞</span>";
+                }
+                const html = `<div class="planet-token">${p} <span class="deg-span">${dStr}° ${mStr}'</span>${retroHtml}</div>`;
+                if (rasiGroups[targetSign]) rasiGroups[targetSign].push({ rawDeg, html });
+            }
+        }
+    });
+
+    let alpTargetSign = null;
+    let alpTokenHtml = "";
+    if (typeof computeALPAbs === 'function') {
+        const alpAbs = computeALPAbs();
+        if (alpAbs !== null && !isNaN(alpAbs)) {
+            alpTargetSign = SIGNS[Math.floor(alpAbs / 30)];
+            const rawDeg = alpAbs % 30;
+            const deg = Math.floor(rawDeg);
+            const min = Math.floor((rawDeg - deg) * 60);
+            const dStr = deg.toString();
+            const mStr = min.toString().padStart(2, '0');
+
+            alpTokenHtml = `<div class="planet-token alp-token">ALP <span class="deg-span">${dStr}° ${mStr}'</span></div>`;
+            window.alpTokenAgeHtml = `<div class="planet-token alp-token">ALP <span class="deg-span">${dStr}°</span></div>`;
+            window.alpTokenYearHtml = `<div class="planet-token alp-token">ALP <span class="deg-span">${dStr}° ${mStr}'</span></div>`;
+            
+            if (rasiGroups[alpTargetSign]) rasiGroups[alpTargetSign].push({ rawDeg, html: alpTokenHtml });
+        }
+    }
+
+    const ascendingSigns = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo"];
+    if (typeof SIGNS !== 'undefined') {
+        SIGNS.forEach(sign => {
+            const group = rasiGroups[sign];
+            if (group && group.length > 0) {
+                if (ascendingSigns.includes(sign)) {
+                    group.sort((a, b) => a.rawDeg - b.rawDeg); 
+                } else {
+                    group.sort((a, b) => b.rawDeg - a.rawDeg); 
+                }
+                const rasiBox = document.querySelector('#rasi-' + sign + ' .rasi-planets');
+                if (rasiBox) rasiBox.innerHTML = group.map(item => item.html).join('');
+            }
+        });
+    }
+
+    document.querySelectorAll('#ageKundali .rasi-planets').forEach(box => box.innerHTML = '');
+    document.querySelectorAll('#yearKundali .rasi-planets').forEach(box => box.innerHTML = '');
+
+    const dobEl = document.getElementById("dob");
+    const bSignEl = document.getElementById("birthSign");
+    const bDegEl = document.getElementById("birthDeg");
+    const bMinEl = document.getElementById("birthMin");
+
+    if (dobEl && dobEl.value && bSignEl && bSignEl.value && bDegEl) {
+        const dobDate = new Date(dobEl.value);
+        const birthAbs = absDeg(bSignEl.value, +bDegEl.value, +bMinEl.value);
+        const janmaIndex = Math.floor(birthAbs / 30);
+
+        for (let i = 0; i < 12; i++) {
+            const signIdx = (janmaIndex + i) % 12;
+            const signName = SIGNS[signIdx];
+
+            let fromAbs = (i === 0) ? birthAbs : ((janmaIndex + i) % 12) * 30;
+            let toAbs = ((janmaIndex + i + 1) % 12) * 30;
+
+            let fromDateStr = typeof alpAbsToDate === 'function' ? alpAbsToDate(fromAbs) : null;
+            let toDateStr = typeof alpAbsToDate === 'function' ? alpAbsToDate(toAbs) : null;
+
+            if(fromDateStr && toDateStr) {
+                let fromDate = new Date(fromDateStr);
+                let toDate = new Date(toDateStr);
+
+                let fromY = fromDate.getFullYear();
+                let toY = toDate.getFullYear();
+
+                let ageFrom = Math.round((fromDate - dobDate) / 31557600000);
+                let ageTo = Math.round((toDate - dobDate) / 31557600000);
+
+                const ageBox = document.querySelector('#rasi-age-' + signName + ' .rasi-planets');
+                if (ageBox) ageBox.innerHTML = `<div class="span-text">${ageFrom} to ${ageTo}</div>`;
+
+                const yearBox = document.querySelector('#rasi-year-' + signName + ' .rasi-planets');
+                if (yearBox) yearBox.innerHTML = `<div class="span-text">${fromY} to ${toY}</div>`;
+            }
+        }
+        
+        if (alpTargetSign) {
+            const ageBox = document.querySelector('#rasi-age-' + alpTargetSign + ' .rasi-planets');
+            if (ageBox && window.alpTokenAgeHtml) ageBox.innerHTML += window.alpTokenAgeHtml;
+            
+            const yearBox = document.querySelector('#rasi-year-' + alpTargetSign + ' .rasi-planets');
+            if (yearBox && window.alpTokenYearHtml) yearBox.innerHTML += window.alpTokenYearHtml;
+        }
+    }
+}
+
+/* =========================================================
+   TABLE 8 LOGIC : VEDIC ASPECTS & MULTI-SELECT INTERACTIONS
+   ========================================================= */
+
+const VEDIC_SHORT_NAMES = {
+    Surya: "Sury", Chandra: "Chnd", Mangala: "Kuja", Budha: "Buda",
+    Guru: "Guru", Shukra: "Shuk", Shani: "Shan", Rahu: "Rahu", Ketu: "Ketu"
+};
+
+function getVedicOrdinal(n) {
+    if(n === 3) return "3rd";
+    if(n === 1) return "1st";
+    if(n === 2) return "2nd";
+    return n + "th";
+}
+
+
+
+
+
+
+
+function getDynamicVedicAspects(planet) {
+    if (planet === "Shani") return [3, 7, 10];
+    if (planet === "Mangala") return [4, 7, 8];
+    if (planet === "Guru") return [5, 7, 9];
+    if (planet === "Rahu" || planet === "Ketu") {
+        const alt = document.getElementById("rkAspectsToggle")?.checked;
+        return alt ? [3, 7, 11] : [5, 7, 9]; 
+    }
+    return [7]; 
+}
+
+function buildVedicAspectsTable() {
+    const p2pTable = document.getElementById("p2pTable");
+    const p2hTable = document.getElementById("p2hTable");
+    if (!p2pTable || !p2hTable || typeof getHouseFromALP !== "function") return;
+
+    p2pTable.innerHTML = "";
+    p2hTable.innerHTML = "";
+
+    let dashaArr = typeof KP_DASHA_ORDER !== 'undefined' ? KP_DASHA_ORDER : ["Ketu", "Shukra", "Surya", "Chandra", "Mangala", "Rahu", "Guru", "Shani", "Budha"];
+
+    // 1. GET STAR LORD FOR BIRTH
+    let starLord = "Ketu";
+    if (typeof getStarLordT3 === 'function') {
+        starLord = getStarLordT3("Chandra") || "Ketu";
+    }
+
+    // 2. GET CURRENTLY RUNNING MAHADASHA
+    let currentDasha = starLord; // Fallback if no DOB entered yet
+    if (window.activeVimLords && window.activeVimLords.dasha) {
+        currentDasha = window.activeVimLords.dasha;
+    }
+
+    // 3. DETERMINE P2P ORDER (Checks the 'Birth' Toggle)
+    let isBirth = document.getElementById("p2pBirthToggle")?.checked;
+    let startPlanetP2P = isBirth ? starLord : currentDasha;
+    
+    let startIndexP2P = dashaArr.indexOf(startPlanetP2P);
+    if(startIndexP2P === -1) startIndexP2P = 0;
+    let orderP2P = [];
+    for(let i=0; i<9; i++) {
+        orderP2P.push(dashaArr[(startIndexP2P + i) % 9]);
+    }
+
+    // 4. DETERMINE P2H ORDER (Always Current Dasha)
+    let startIndexP2H = dashaArr.indexOf(currentDasha);
+    if(startIndexP2H === -1) startIndexP2H = 0;
+    let orderP2H = [];
+    for(let i=0; i<9; i++) {
+        orderP2H.push(dashaArr[(startIndexP2H + i) % 9]);
+    }
+
+    // =========================================
+    // PLANET TO PLANET TABLE (orderP2P)
+    // =========================================
+    let p2pHeader = p2pTable.insertRow();
+    p2pHeader.appendChild(document.createElement("th")); // Empty top-left
+    orderP2P.forEach(p => {
+        let th = document.createElement("th");
+        th.innerHTML = `<b>${p}</b>`;
+        p2pHeader.appendChild(th);
+    });
+
+    orderP2P.forEach(p1 => {
+        let r = p2pTable.insertRow();
+        let firstCell = r.insertCell();
+        firstCell.innerHTML = `<b>${p1}</b>`;
+
+        let abs1 = typeof getPlanetAbs === 'function' ? getPlanetAbs(p1) : null;
+        let h1 = (abs1 !== null && !isNaN(abs1)) ? getHouseFromALP(abs1) : null;
+        let aspects = getDynamicVedicAspects(p1);
+
+        orderP2P.forEach(p2 => {
+            let cell = r.insertCell();
+            if (p1 === p2) {
+                cell.textContent = "---";
+            } else {
+                let abs2 = typeof getPlanetAbs === 'function' ? getPlanetAbs(p2) : null;
+                let h2 = (abs2 !== null && !isNaN(abs2)) ? getHouseFromALP(abs2) : null;
+                if(h1 && h2) {
+                    let dist = (h2 - h1 + 12) % 12 + 1;
+                    if (aspects.includes(dist)) {
+                        cell.textContent = getVedicOrdinal(dist);
+                        cell.style.color = "#facc15"; 
+                        cell.style.fontWeight = "bold";
+                    } else {
+                        cell.textContent = "---";
+                    }
+                } else {
+                    cell.textContent = "---";
+                }
+            }
+        });
+    });
+
+    // =========================================
+    // PLANET TO HOUSE TABLE (orderP2H)
+    // =========================================
+    let p2hHeader = p2hTable.insertRow();
+    p2hHeader.appendChild(document.createElement("th")); // Empty top-left
+    for(let h=1; h<=12; h++) {
+        let th = document.createElement("th");
+        th.innerHTML = `<b>${h}H</b>`;
+        p2hHeader.appendChild(th);
+    }
+
+    orderP2H.forEach(p1 => {
+        let r = p2hTable.insertRow();
+        let firstCell = r.insertCell();
+        firstCell.innerHTML = `<b>${p1}</b>`;
+
+        let abs1 = typeof getPlanetAbs === 'function' ? getPlanetAbs(p1) : null;
+        let h1 = (abs1 !== null && !isNaN(abs1)) ? getHouseFromALP(abs1) : null;
+        let aspects = getDynamicVedicAspects(p1);
+        let shortName = VEDIC_SHORT_NAMES[p1] || p1;
+
+        for(let h=1; h<=12; h++) {
+            let cell = r.insertCell();
+            if (!h1) continue;
+
+            if (h === h1) {
+                cell.textContent = shortName;
+                cell.classList.add("placement-cell"); 
+            } else {
+                let dist = (h - h1 + 12) % 12 + 1;
+                if (aspects.includes(dist)) {
+                    cell.textContent = getVedicOrdinal(dist);
+                    cell.style.color = "#facc15"; 
+                    cell.style.fontWeight = "bold";
+                } else {
+                    cell.textContent = "---";
+                }
+            }
+        }
+    });
+
+    attachVedicInteractions("p2pTable");
+    attachVedicInteractions("p2hTable");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================
+// HOVER & MULTI-SELECT CLICK HIGHLIGHT LOGIC 
+// =========================================================
+function attachVedicInteractions(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    let activeRows = new Set();
+    let activeCols = new Set();
+
+    const updateHighlights = () => {
+        // Clear old highlights
+        table.querySelectorAll('.vedic-active-bg').forEach(el => el.classList.remove('vedic-active-bg'));
+        
+        // Apply Row Highlights
+        activeRows.forEach(rowIdx => {
+            if (table.rows[rowIdx]) {
+                for (let i = 0; i < table.rows[rowIdx].cells.length; i++) { 
+                    table.rows[rowIdx].cells[i].classList.add('vedic-active-bg');
+                }
+            }
+        });
+
+        // Apply Column Highlights
+        activeCols.forEach(colIdx => {
+            for (let i = 0; i < table.rows.length; i++) { 
+                if (table.rows[i].cells[colIdx]) {
+                    table.rows[i].cells[colIdx].classList.add('vedic-active-bg');
+                }
+            }
+        });
+    };
+
+    // 1. TOP HEADING INTERACTIONS
+    const headers = table.rows[0].cells;
+    for (let i = 1; i < headers.length; i++) {
+        headers[i].addEventListener('click', () => {
+            if (activeCols.has(i)) activeCols.delete(i);
+            else activeCols.add(i);
+            updateHighlights();
+        });
+        
+        headers[i].addEventListener('mouseenter', () => {
+            for (let r = 1; r < table.rows.length; r++) { 
+                if (table.rows[r].cells[i]) table.rows[r].cells[i].classList.add('vedic-hover-bg');
+            }
+        });
+        headers[i].addEventListener('mouseleave', () => {
+            table.querySelectorAll('.vedic-hover-bg').forEach(el => el.classList.remove('vedic-hover-bg'));
+        });
+    }
+
+    // 2. FIRST COLUMN INTERACTIONS
+    for (let i = 1; i < table.rows.length; i++) {
+        const firstCell = table.rows[i].cells[0];
+        
+        firstCell.addEventListener('click', () => {
+            if (activeRows.has(i)) activeRows.delete(i);
+            else activeRows.add(i);
+            updateHighlights();
+        });
+
+        firstCell.addEventListener('mouseenter', () => {
+            for (let c = 1; c < table.rows[i].cells.length; c++) { 
+                table.rows[i].cells[c].classList.add('vedic-hover-bg');
+            }
+        });
+        firstCell.addEventListener('mouseleave', () => {
+            table.querySelectorAll('.vedic-hover-bg').forEach(el => el.classList.remove('vedic-hover-bg'));
+        });
+    }
+
+    // 3. CROSSHAIR HOVER LOGIC
+    for (let i = 1; i < table.rows.length; i++) {
+        for (let j = 1; j < table.rows[i].cells.length; j++) {
+            const cell = table.rows[i].cells[j];
+            
+            cell.addEventListener('mouseenter', () => {
+                // Highlight Vertical (excluding top header)
+                for (let r = 1; r < table.rows.length; r++) { 
+                    if (table.rows[r].cells[j]) table.rows[r].cells[j].classList.add('vedic-hover-bg');
+                }
+                // Highlight Horizontal (excluding left header)
+                for (let c = 1; c < table.rows[i].cells.length; c++) { 
+                    table.rows[i].cells[c].classList.add('vedic-hover-bg');
+                }
+            });
+            
+            cell.addEventListener('mouseleave', () => {
+                table.querySelectorAll('.vedic-hover-bg').forEach(el => el.classList.remove('vedic-hover-bg'));
+            });
+        }
+    }
+}
+
+/* =========================================================
+   MASTER HOOKS & SMART VEDIC UPDATER 
+   ========================================================= */
+if (!window.__MASTER_KUNDALI_HOOK__) {
+    window.__MASTER_KUNDALI_HOOK__ = true;
+    
+    const _old_recalc = window.recalc || function(){};
+    window.recalc = function() {
+        _old_recalc(); 
+        updateAllKundalis(); 
+        
+        // 🚀 FORCES VEDIC TABLE TO INSTANTLY UPDATE ON JSON LOAD OR DATE CHANGE
+        window.__lastVedicState = "force_update"; 
+        setTimeout(buildVedicAspectsTable, 150);
+    };
+
+    setInterval(() => {
+        updateAllKundalis();
+    }, 1000);
+}
+
+// 🔥 THIS GUARANTEES THE VEDIC TABLE LOADS PROPERLY EVERY TIME 
+window.__lastVedicState = "";
+setInterval(() => {
+    if (typeof getHouseFromALP !== 'function') return;
+    
+    let order = ["Surya", "Chandra", "Mangala", "Budha", "Guru", "Shukra", "Shani", "Rahu", "Ketu"];
+    let state = "";
+    
+    order.forEach(p => {
+        let abs = typeof getPlanetAbs === 'function' ? getPlanetAbs(p) : null;
+        state += (abs !== null && !isNaN(abs)) ? Math.round(abs) + "," : "x,";
+    });
+    
+    let alp = typeof computeALPAbs === 'function' ? computeALPAbs() : null;
+    state += (alp !== null && !isNaN(alp)) ? Math.round(alp) + "," : "x,";
+    
+    // Add Star Lord AND Current Mahadasha to state to ensure the tables rebuild when they change
+    let sl = typeof getStarLordT3 === 'function' ? getStarLordT3("Chandra") : "";
+    let activeD = (window.activeVimLords && window.activeVimLords.dasha) ? window.activeVimLords.dasha : "";
+    state += sl + "," + activeD + ",";
+    
+    let rkToggle = document.getElementById("rkAspectsToggle");
+    state += (rkToggle ? rkToggle.checked : false) + "-" + (typeof getActiveSys === 'function' ? getActiveSys() : "");
+    
+    if (state !== window.__lastVedicState) {
+        window.__lastVedicState = state;
+        buildVedicAspectsTable();
+    }
+}, 800);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1263,6 +2210,33 @@ TABLE-4 : KUNDALI LORDS FROM ALP
 
 
 <script>
+/* =========================================================
+   MASTER CONTROL PANEL
+   Change this ONE value to "Sign2Sign", "KP", or "Vedic"
+   ========================================================= */
+window.MASTER_DEFAULT_SYSTEM = "Sign2Sign";
+
+function getActiveSys(){
+  const btn = document.querySelector('.sys-btn.active');
+  return btn ? btn.dataset.sys : window.MASTER_DEFAULT_SYSTEM;
+}
+
+function resetSysUI(){
+  document.querySelectorAll('.sys-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '#020617';
+    b.style.color = 'var(--text-main)';
+    b.style.borderColor = 'var(--border-soft)';
+  });
+  const tgt = document.querySelector('.sys-btn[data-sys="' + window.MASTER_DEFAULT_SYSTEM + '"]');
+  if(tgt) {
+    tgt.classList.add('active');
+    tgt.style.background = '#facc15';
+    tgt.style.color = '#020617';
+    tgt.style.borderColor = '#facc15';
+  }
+}
+
 const EPS=1e-9;
 const ALP_SPEED=3/365;
 
@@ -1724,7 +2698,7 @@ function recalc(){
   diff_ALP.textContent=diffBirth.toFixed(2)+"°";
   aspect_ALP.textContent=getAspect(diffBirth);
 
-  const hs = document.querySelector('input[name="houseSystem"]:checked')?.value || "KP";
+  const hs = getActiveSys();
   const westAsp=document.getElementById("westAspectToggle").checked;
 
   PLANETS.forEach(p=>{
@@ -1733,16 +2707,23 @@ function recalc(){
     let pAbs = getPlanetAbs(p);
     if(pAbs === null) return;
 
+    // Move rawDiff UP so it is available globally to the rest of the calculations
     const rawDiff = (pAbs - alpAbs + 360) % 360;
 
     let house;
-    if(hs === "KP"){
-      house = Math.floor(rawDiff / 30) + 1;
-    }else{
-      house = Math.floor((rawDiff + 15) / 30) + 1;
+    if(hs === "Sign2Sign"){
+      const safeAlp = ((alpAbs % 360) + 360) % 360; // Extra safety for edge case dates
+      const baseSign = SIGNS[Math.floor(safeAlp / 30)];
+      const targetSign = data[p].sign;
+      house = getSignToSignBhava(baseSign, targetSign);
+    } else {
+      if(hs === "KP"){
+        house = Math.floor(rawDiff / 30) + 1;
+      }else{
+        house = Math.floor((rawDiff + 15) / 30) + 1;
+      }
+      if(house > 12) house -= 12;
     }
-
-    if(house > 12) house -= 12;
 
     document.getElementById("house_"+p).textContent = house;
 
@@ -1784,6 +2765,7 @@ function recalc(){
 
 /* ================== INIT ================== */
 
+resetSysUI();
 buildTable();
 transitDate.value=new Date().toISOString().split("T")[0];
 
@@ -1807,9 +2789,30 @@ westAspectToggle.onchange = ()=>{
 };
 
 
-document.querySelectorAll('input[name="houseSystem"]').forEach(r=>{
-  r.onchange=recalc;
-});
+document.querySelectorAll('.sys-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    // Reset all buttons
+    document.querySelectorAll('.sys-btn').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = '#020617';
+      b.style.color = 'var(--text-main)';
+      b.style.borderColor = 'var(--border-soft)';
+    });
+    // Activate clicked button
+    this.classList.add('active');
+    this.style.background = '#facc15';
+    this.style.color = '#020617';
+    this.style.borderColor = '#facc15';
+    
+  // Force universal recalculation across ALL tables
+            if(typeof recalc === "function") recalc();
+            if(typeof buildTable2 === "function") buildTable2();
+            if(typeof buildKundaliLordsTable3 === "function") buildKundaliLordsTable3();
+            if(typeof buildTable3 === "function") buildTable3();
+            if(typeof buildRahuKetuTable === "function") buildRahuKetuTable();
+            if(typeof buildVedicAspectsTable === "function") buildVedicAspectsTable();
+          });
+        });
 
 todayBtn.onclick=()=>{
   manualALPAbs=null;
@@ -1983,20 +2986,16 @@ function buildALPNakshatraTable(alpAbs){
 
 
 let fromItsBhava = "";
-
-const signOnly =
-  document.getElementById("signOnlyBhavaToggle")?.checked;
+const activeSys = getActiveSys();
 
 if(placedHouse){
-
-  if(signOnly){
+  if(activeSys === "Sign2Sign"){
     /* SIGN-TO-SIGN ONLY (IGNORE DEGREE) */
     const targetSign = data[lord]?.sign;
     const baseSign   = SIGNS[(getSignIndex(alpAbs) + h - 1) % 12];
     fromItsBhava = getSignToSignBhava(baseSign, targetSign);
-
   }else{
-    /* DEGREE / KP LOGIC (EXISTING) */
+    /* DEGREE / KP / VEDIC LOGIC (EXISTING) */
     fromItsBhava = ((placedHouse - h + 12) % 12) + 1;
   }
 }
@@ -2231,8 +3230,7 @@ fileInput.onchange = e=>{
     if(document.getElementById("modeDateHide")) document.getElementById("modeDateHide").checked = true;
     if(document.getElementById("modeKN")) document.getElementById("modeKN").checked = true;
     
-    const kpRadio = document.querySelector('input[name="houseSystem"][value="KP"]');
-    if(kpRadio) kpRadio.checked = true;
+    resetSysUI();
     
     const meanRadio = document.querySelector('input[name="nodeMode"][value="MEAN"]');
     if(meanRadio) meanRadio.checked = true;
@@ -2475,14 +3473,19 @@ function updateHouseSummary(tableBodyId, barId){
 
 
 
-function getHouseFromALP(abs){
+function getHouseFromALP(abs, targetSign = null){
   const alpAbs = computeALPAbs();
+  const hs = getActiveSys();
+
+  if(hs === "Sign2Sign"){
+    const safeAlp = ((alpAbs % 360) + 360) % 360;
+    const safeAbs = ((abs % 360) + 360) % 360;
+    const baseSign = SIGNS[Math.floor(safeAlp / 30)];
+    const tSign = targetSign || SIGNS[Math.floor(safeAbs / 30)];
+    return getSignToSignBhava(baseSign, tSign);
+  }
+
   const rawDiff = (abs - alpAbs + 360) % 360;
-
-  const hs = document.querySelector(
-    'input[name="houseSystem"]:checked'
-  )?.value || "KP";
-
   let house;
   if(hs === "KP"){
     house = Math.floor(rawDiff / 30) + 1;
@@ -2543,13 +3546,10 @@ function buildKundaliLordsTable3(){
 
     /* ---------- FROM ITS BHAVA (UNCHANGED) ---------- */
 			let fromItsBhava = "";
-
-		const signOnly =
-		  document.getElementById("signOnlyBhavaToggle")?.checked;
+		const activeSys = getActiveSys();
 
 		if(fromALP){
-
-		  if(document.getElementById("signOnlyBhavaToggle")?.checked){
+		  if(activeSys === "Sign2Sign"){
 			const targetSign = data[signLord]?.sign;
 			const baseSign   = sign;
 			fromItsBhava = getSignToSignBhava(baseSign, targetSign);
@@ -2649,23 +3649,8 @@ TABLE-4B : RAHU & KETU FROM ALP
    ========================================================= */
 
 /* --- SAME HOUSE LOGIC AS TABLE-1 (KP / VEDIC) --- */
-function getHouseFromALP_RK(abs){
-  const alpAbs = computeALPAbs();
-  const rawDiff = (abs - alpAbs + 360) % 360;
-
-  const hs = document.querySelector(
-    'input[name="houseSystem"]:checked'
-  )?.value || "KP";
-
-  let house;
-  if(hs === "KP"){
-    house = Math.floor(rawDiff / 30) + 1;
-  }else{
-    house = Math.floor((rawDiff + 15) / 30) + 1;
-  }
-
-  if(house > 12) house -= 12;
-  return house;
+function getHouseFromALP_RK(abs, targetSign = null){
+  return getHouseFromALP(abs, targetSign);
 }
 
 /* --- BUILD TABLE-3B --- */
@@ -3332,14 +4317,7 @@ document
 
 
 <script>
-/* =========================================================
-   SIGN-TO-SIGN TOGGLE → AUTO REFRESH
-   ========================================================= */
-document
-  .getElementById("signOnlyBhavaToggle")
-  ?.addEventListener("change", ()=>{
-    if(typeof recalc === "function") recalc();
-  });
+
   
   
   document
@@ -3410,21 +4388,7 @@ alpLordshipToggle?.addEventListener("change", ()=>{
 
 
 <script>
-/* =========================================================
-   FIX-4 : HARD FORCE REFALC ON KP / VEDIC TOGGLE
-   (Ensures ALL tables recalc using LIVE house logic)
-   ========================================================= */
 
-document
-  .querySelectorAll('input[name="houseSystem"]')
-  .forEach(radio=>{
-    radio.addEventListener("change", ()=>{
-      if(typeof recalc === "function") recalc();
-      if(typeof buildTable2 === "function") buildTable2();
-      if(typeof buildKundaliLordsTable3 === "function") buildKundaliLordsTable3();
-      if(typeof buildTable3 === "function") buildTable3();
-    });
-  });
 </script>
 
 
@@ -4094,13 +5058,11 @@ swissFileInput.onchange = e=>{
     if(document.getElementById("expandLevel")) document.getElementById("expandLevel").value = "2";
     
     if(document.getElementById("westAspectToggle")) document.getElementById("westAspectToggle").checked = false;
-    if(document.getElementById("signOnlyBhavaToggle")) document.getElementById("signOnlyBhavaToggle").checked = true;
     if(document.getElementById("alpLordshipToggle")) document.getElementById("alpLordshipToggle").checked = false;
     if(document.getElementById("modeDateHide")) document.getElementById("modeDateHide").checked = true;
     if(document.getElementById("modeKN")) document.getElementById("modeKN").checked = true;
     
-    const kpRadio = document.querySelector('input[name="houseSystem"][value="KP"]');
-    if(kpRadio) kpRadio.checked = true;
+    resetSysUI();
     
     const meanRadio = document.querySelector('input[name="nodeMode"][value="MEAN"]');
     if(meanRadio) meanRadio.checked = true;
@@ -4300,6 +5262,7 @@ swissFileInput.onchange = e=>{
   <button class="nav-btn" onclick="jumpTo('table-5')">5</button>
   <button class="nav-btn" onclick="jumpTo('table-6')">6</button>
   <button class="nav-btn" onclick="jumpTo('table-7')">7</button>
+  <button class="nav-btn" onclick="jumpTo('table-8')">8</button>
 
 </div>
 
