@@ -109,14 +109,14 @@ button:hover{
    COLLAPSE SYSTEM FOR TABLES 1, 5, 6, AND 7
    ========================================================= */
 
-#table1ContentWrapper, #table5Wrapper, #table6Wrapper, #table7Wrapper {
+#table1ContentWrapper, #table6DistanceWrapper, #table8KpWrapper, #table9Wrapper, #table10Wrapper, #mixerWrapper {
   overflow:hidden;
   transition:max-height .45s ease, opacity .35s ease;
   max-height:8000px;
   opacity:1;
 }
 
-#table1ContentWrapper.collapsed, #table5Wrapper.collapsed, #table6Wrapper.collapsed, #table7Wrapper.collapsed {
+#table1ContentWrapper.collapsed, #table6DistanceWrapper.collapsed, #table8KpWrapper.collapsed, #table9Wrapper.collapsed, #table10Wrapper.collapsed, #mixerWrapper.collapsed {
   max-height:0;
   opacity:0;
 }
@@ -387,28 +387,31 @@ input[type="radio"]{
 		  cursor:pointer;
 		}
 
-		/* Persistent selected row */
-		tr.row-selected td{
-		  background:
-			linear-gradient(
-			  180deg,
-			  rgba(250,204,21,0.16),
-			  rgba(250,204,21,0.09)
-			) !important;
-
-		  border-color:rgba(250,204,21,0.55) !important;
-
-		  box-shadow:
-			inset 0 0 0 1px rgba(250,204,21,0.45),
-			inset 0 0 8px rgba(250,204,21,0.22);
-
-		  font-weight:700;
+		/* Persistent selected row (Crisp Crimson with Thin Yellow Outline) */
+		tr.row-selected td {
+		  background: linear-gradient(180deg, #590000 0%, #1a0000 100%) !important; 
+		  border-top: 1px solid #facc15 !important; /* Thinner top outline */
+		  border-bottom: 1px solid #facc15 !important; /* Thinner bottom outline */
+		  border-left: 1px solid #7f1d1d !important; 
+		  border-right: 1px solid #7f1d1d !important; 
+		  color: #ffffff !important; 
+		  box-shadow: none !important; 
+		  font-weight: 900 !important;
+		}
+		
+		/* Caps the ends of the row with thin yellow to complete the full outline box */
+		tr.row-selected td:first-child {
+		  border-left: 1px solid #facc15 !important; /* Thinner left outline */
+		}
+		tr.row-selected td:last-child {
+		  border-right: 1px solid #facc15 !important; /* Thinner right outline */
 		}
 
-		/* Optional: subtle glow on text */
+		/* Optional: subtle glow on text - REMOVED FOR CLARITY */
 		tr.row-selected td{
-		  text-shadow:0 0 6px rgba(250,204,21,0.55);
+		  text-shadow: none !important; /* Removes the foggy text blur */
 		}
+		
 
 
 	
@@ -598,13 +601,13 @@ input[type="radio"]{
 }
 
 .house-summary-good{
-  color:#86efac;
-  text-shadow:0 0 8px rgba(134,239,172,.6);
+  color:#32cd32; /* Strong Parrot/Lime Green matching the timeline style */
+  text-shadow:0 0 8px rgba(50,205,50,.6);
 }
 
 .house-summary-bad{
-  color:#fca5a5;
-  text-shadow:0 0 8px rgba(252,165,165,.6);
+  color:#ef4444; /* Changed to a strong, solid red */
+  text-shadow:0 0 8px rgba(239,68,68,.6);
 }
 
 /* =========================================================
@@ -1730,6 +1733,15 @@ TABLE-1 : DATA INPUT TABLE
     pointer-events: none;
   }
 
+  /* =========================================================
+     NAVAMSHA (ALP NAKSHATRA) HIGHLIGHT
+     ========================================================= */
+  .navamsha-highlight {
+      background: linear-gradient(180deg, rgba(6, 78, 59, 0.5), rgba(2, 44, 34, 0.8)) !important; /* Dark Green Shade */
+      border-color: #059669 !important; /* Emerald Border */
+      box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.25) !important;
+  }
+
   .rasi-planets {
     display: flex;
     flex-direction: column; 
@@ -1879,6 +1891,37 @@ TABLE-1 : DATA INPUT TABLE
         <div>𓀯</div> <div>𓃠</div> <div>𓆣</div>
     </div>
   </div>
+
+  <!-- ================= NEW NAVAMSHA HIGHLIGHT BAR & TOOL ================= -->
+  <div style="width: 100%; max-width: 1300px; margin: 0 auto 30px auto; display: flex; justify-content: center;">
+    
+    <div class="alp-changer" style="width: 100%; display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap: 20px; padding: 12px 20px;">
+      
+      <!-- Duplicate Pada Changer Tool -->
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <button class="alp-btn" id="alpPadaPrevDup">◀</button>
+        <div class="alp-label" id="alpPadaLabelDup" style="min-width: 250px; text-align: center; margin: 0;">—</div>
+        <button class="alp-btn" id="alpPadaNextDup">▶</button>
+        <div class="alp-dates" style="margin: 0;">
+          From : <span id="alpPadaStartDup">—</span> |
+          To : <span id="alpPadaEndDup">—</span>
+        </div>
+      </div>
+
+      <!-- Checkbox & Navamsha Result -->
+      <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; font-weight:800; background:#020617; border:1px solid #334155; padding:6px 16px; border-radius:8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
+         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#f8fafc; font-size: 15px; margin: 0;">
+             <input type="checkbox" id="navamshaHighlightCb" style="accent-color: #10b981; color-scheme: dark; width: 16px; height: 16px; cursor: pointer; background: #020617; border: 1px solid #334155;">
+             Navamsh
+         </label>
+         <span style="color:#334155;">|</span>
+         <span id="navamshaSignText" style="color:#34d399; font-size: 15px; letter-spacing: 0.5px;">Navamsha : —</span>
+      </div>
+      
+    </div>
+
+  </div>
+  <!-- ===================================================================== -->
 
   <div class="twin-wrapper">
     
@@ -2030,7 +2073,7 @@ TABLE-1 : DATA INPUT TABLE
     VEDIC ASPECTS
   </h2>
 
-  <div id="table8Wrapper">
+  <div id="table8Wrapper" class="collapsed">
     <div style="text-align:center;margin-bottom:14px;font-weight:800;color:#facc15;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
       <label>
         <input type="checkbox" id="rkAspectsToggle" onchange="window.__lastVedicState='force';">
@@ -2101,6 +2144,26 @@ function updateAllKundalis() {
         }
     });
 
+    // ================= NEW ASC (LAGNA) LOGIC =================
+    const bSignEl = document.getElementById("birthSign");
+    const bDegEl = document.getElementById("birthDeg");
+    const bMinEl = document.getElementById("birthMin");
+
+    if (bSignEl && bSignEl.value && bDegEl && bDegEl.value !== "") {
+        const ascSign = bSignEl.value;
+        const ascDeg = parseInt(bDegEl.value) || 0;
+        const ascMin = parseInt(bMinEl.value) || 0;
+        const rawDeg = ascDeg + (ascMin / 60);
+        const dStr = ascDeg.toString();
+        const mStr = ascMin.toString().padStart(2, '0');
+
+        // Styled to look distinct (Blue-ish like in the mixer chart)
+        const ascHtml = `<div class="planet-token" style="background: linear-gradient(135deg, #1e3a8a, #172554); border-color: #60a5fa; color: #ffffff;">ASC <span class="deg-span" style="color: #bfdbfe;">${dStr}° ${mStr}'</span></div>`;
+        
+        if (rasiGroups[ascSign]) rasiGroups[ascSign].push({ rawDeg, html: ascHtml });
+    }
+    // =========================================================
+
     let alpTargetSign = null;
     let alpTokenHtml = "";
     if (typeof computeALPAbs === 'function') {
@@ -2141,9 +2204,6 @@ function updateAllKundalis() {
     document.querySelectorAll('#yearKundali .rasi-planets').forEach(box => box.innerHTML = '');
 
     const dobEl = document.getElementById("dob");
-    const bSignEl = document.getElementById("birthSign");
-    const bDegEl = document.getElementById("birthDeg");
-    const bMinEl = document.getElementById("birthMin");
 
     if (dobEl && dobEl.value && bSignEl && bSignEl.value && bDegEl) {
         const dobDate = new Date(dobEl.value);
@@ -2210,6 +2270,32 @@ function updateAllKundalis() {
     } else {
         // Clear numbers if ALP is missing
         document.querySelectorAll('#southIndianKundali .house-number').forEach(el => el.remove());
+    }
+
+    // --- NAVAMSHA (ALP NAKSHATRA) HIGHLIGHT LOGIC ---
+    document.querySelectorAll('#southIndianKundali .rasi-box').forEach(box => {
+        box.classList.remove('navamsha-highlight');
+    });
+
+    if (typeof computeALPAbs === 'function') {
+        const alpAbs = computeALPAbs();
+        if (alpAbs !== null && !isNaN(alpAbs)) {
+            const NAK_SIZE = 360 / 27;
+            const PADA_SIZE = 360 / 108;
+            
+            const nakIndex = Math.floor(alpAbs / NAK_SIZE);
+            const padaIndex = Math.floor((alpAbs % NAK_SIZE) / PADA_SIZE) + 1;
+            
+            // Formula matches the exact Navamsha Zodiac sequence
+            const navamshaIndex = (((nakIndex % 9) * 4) + (padaIndex - 1)) % 12;
+            const navamshaSign = SIGNS[navamshaIndex];
+            
+            const cb = document.getElementById("navamshaHighlightCb");
+            if (cb && cb.checked) {
+                const targetBox = document.getElementById('rasi-' + navamshaSign);
+                if (targetBox) targetBox.classList.add('navamsha-highlight');
+            }
+        }
     }
 }
 
@@ -3752,6 +3838,21 @@ function updateALPControls(alpAbs){
 
   alpPadaStart.textContent = alpAbsToDate(padaStartAbs);
   alpPadaEnd.textContent   = alpAbsToDate(padaEndAbs);
+
+  // --- SYNC DUPLICATE CHANGER & NAVAMSHA INFO BAR ---
+  const alpPadaLabelDup = document.getElementById("alpPadaLabelDup");
+  const alpPadaStartDup = document.getElementById("alpPadaStartDup");
+  const alpPadaEndDup = document.getElementById("alpPadaEndDup");
+  
+  if (alpPadaLabelDup) alpPadaLabelDup.textContent = alpPadaLabel.textContent;
+  if (alpPadaStartDup) alpPadaStartDup.textContent = alpPadaStart.textContent;
+  if (alpPadaEndDup) alpPadaEndDup.textContent = alpPadaEnd.textContent;
+
+  const navamshaSignText = document.getElementById("navamshaSignText");
+  if (navamshaSignText) {
+      const navamshaIndex = (((nIdx % 9) * 4) + (pIdx - 1)) % 12;
+      navamshaSignText.textContent = `Navamsha : ${SIGNS[navamshaIndex]}`;
+  }
 }
 
 
@@ -3864,6 +3965,23 @@ alpPadaNext.onclick = ()=>{
 
   recalc();
 };
+
+/* ================== DUPLICATE PADA BUTTONS & CHECKBOX ================== */
+const alpPadaPrevDup = document.getElementById("alpPadaPrevDup");
+const alpPadaNextDup = document.getElementById("alpPadaNextDup");
+const navamshaHighlightCb = document.getElementById("navamshaHighlightCb");
+
+if (alpPadaPrevDup) {
+    alpPadaPrevDup.onclick = () => document.getElementById("alpPadaPrev").click();
+}
+if (alpPadaNextDup) {
+    alpPadaNextDup.onclick = () => document.getElementById("alpPadaNext").click();
+}
+if (navamshaHighlightCb) {
+    navamshaHighlightCb.addEventListener("change", () => {
+        if (typeof updateAllKundalis === "function") updateAllKundalis();
+    });
+}
 
 /* ================== SAFE RECALC WRAP (DO NOT BREAK LOAD) ================== */
 
@@ -4299,16 +4417,8 @@ if(!window.__T3_KUNDALI_FINAL_FIXED__){
 
 <div style="height:18px;"></div>
 
-<h2 style="
-  margin-top:10px;
-  margin-bottom:12px;
-  text-align:center;
-  color:#fda4af;
-  font-weight:900;
-  letter-spacing:1.8px;
-  text-shadow:0 0 10px #450a0a;
-">
-TABLE-4B : RAHU & KETU FROM ALP
+<h2 style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-5 : RAHU & KETU FROM ALP
 </h2>
 
 <table style="
@@ -4459,62 +4569,250 @@ document
 
 
 
-<div style="text-align:center;margin-bottom:16px;">
-  <label style="font-weight:800;color:#facc15;margin-right:10px;">
-    Sort Planet :
-  </label>
-  <select id="table5SortPlanet"
-          style="padding:6px 14px;border-radius:8px;font-weight:800;">
-    <option value="">Default Order</option>
-    <option>Surya</option>
-    <option>Chandra</option>
-    <option>Mangala</option>
-    <option>Rahu</option>
-    <option>Guru</option>
-    <option>Shani</option>
-    <option>Budha</option>
-    <option>Ketu</option>
-    <option>Shukra</option>
-  </select>
-</div>
 
 
 
 
 
-
-
-
-
-
-
-
-
-<!-- =========================================================
-     PART 5 : TABLE-5 (PLANET ENTITY BOXES – FINAL STABLE)
-     ========================================================= -->
-
-<h2 id="table-5" style="
-  margin-top:40px;
-  margin-bottom:14px;
-  text-align:center;
-  color:#ff9f1c;
-  font-weight:900;
-  letter-spacing:2px;
-  text-shadow:0 0 12px #a86b17;
-  cursor:pointer;
-">
-TABLE-5 : PLANET STAR–SUB LORD ANALYSIS (KP)
+<h2 id="table-6-distance" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-6 : DPT LORD TO ITS DLP NAKSHATRA DISTANCE <span id="t6ToggleIcon" style="font-size: 16px; margin-left: 8px;">▼</span>
 </h2>
 
-<div id="table5Wrapper" class="collapsed">
+<div id="table6DistanceWrapper" class="collapsed">
+<table style="background:linear-gradient(180deg,#020617,#020617cc); border:1px solid #334155;">
+<thead>
+<tr>
+  <th>Entity (House)</th>
+  <th>Sign Lord</th>
+  <th>From ALP (Table 4)</th>
+  <th>Nakshatra Lord</th>
+  <th>House from ALP (Table 3)</th>
+  <th>Relationship</th>
+  <th>Result</th>
+</tr>
+</thead>
+<tbody id="table6DistanceBody"></tbody>
+</table>
+<div id="table6SummaryBar" class="house-summary-bar" style="display:flex; flex-direction:row; justify-content:center; align-items:center; gap:40px; flex-wrap:wrap; padding:12px 10px;">
+  <div class="house-summary-good" style="margin:0; font-size:16px;">GOOD : —</div>
+  <div class="house-summary-bad" style="margin:0; font-size:16px;">BAD : —</div>
+  <div id="table6NavamshaSummary" style="color:#facc15; font-weight:900; font-size:16px; letter-spacing:1.5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); margin:0;">
+    NAVAMSHA (D9) :: — :: —
+  </div>
+</div>
+</div>
 
-  <div style="text-align:center; margin-top:15px; margin-bottom:5px;">
+<script>
+/* =========================================================
+   TABLE-6 : DISTANCE LOGIC (PULLS FROM T4 AND T3)
+   ========================================================= */
+
+function buildTable6Distance(){
+    const body = document.getElementById("table6DistanceBody");
+    const t4Body = document.getElementById("kundaliTable3Body"); // Table 4 Body
+    const t3Body = document.getElementById("alpNakshatraBody");  // Table 3 Body
+
+    if(!body || !t4Body || !t3Body) return;
+    
+    body.innerHTML = "";
+
+    let goodHouses = [];
+    let badHouses = [];
+
+    // Iterate through the 12 Houses
+    for(let h = 1; h <= 12; h++){
+        
+        // Grab the corresponding rows from Table 4 and Table 3 (0-indexed)
+        const t4Row = t4Body.children[h - 1];
+        const t3Row = t3Body.children[h - 1];
+
+        if(!t4Row || !t3Row) continue;
+
+        // Scrape Planet Names (Index 2 in both tables)
+        const signLord = t4Row.children[2].textContent;
+        const nakLord = t3Row.children[2].textContent;
+
+        // Scrape Values
+        const valDPT = parseInt(t4Row.children[4].textContent);
+        const valDLP = parseInt(t3Row.children[3].textContent);
+
+        let relationStr = "---";
+        let resultStr = "---";
+        let resultColor = "#94a3b8"; // Default gray
+
+        if(!isNaN(valDPT) && !isNaN(valDLP)){
+            const dist1 = (valDLP - valDPT + 12) % 12 + 1;
+            const dist2 = (valDPT - valDLP + 12) % 12 + 1;
+
+            relationStr = `${dist1}/${dist2}`;
+
+            // Apply specific Good/Bad rules (2-12 vs 12-2, 4-10 vs 10-4)
+            if (dist1 === 1) { 
+                resultStr = "Good"; resultColor = "#34d399"; 
+            } else if (dist1 === 2 && dist2 === 12) { 
+                resultStr = "Good"; resultColor = "#34d399"; 
+            } else if (dist1 === 12 && dist2 === 2) { 
+                resultStr = "Bad"; resultColor = "#ef4444"; 
+            } else if (dist1 === 3 || dist1 === 11) { 
+                resultStr = "Very Good"; resultColor = "#10b981"; 
+            } else if (dist1 === 4 && dist2 === 10) { 
+                resultStr = "Good"; resultColor = "#34d399"; 
+            } else if (dist1 === 10 && dist2 === 4) { 
+                resultStr = "Pressure"; resultColor = "#34d399"; 
+            } else if (dist1 === 5 || dist1 === 9) { 
+                resultStr = "Very Good"; resultColor = "#10b981"; 
+            } else if (dist1 === 6 || dist1 === 8) { 
+                resultStr = "Very Bad"; resultColor = "#ef4444"; 
+            } else if (dist1 === 7) { 
+                resultStr = "Good"; resultColor = "#34d399"; 
+            }
+            
+            // Collect into Good / Bad Arrays
+            if (resultStr.includes("Good") || resultStr === "Pressure") {
+                goodHouses.push(h);
+            } else if (resultStr.includes("Bad")) {
+                badHouses.push(h);
+            }
+        }
+
+        body.innerHTML += `
+            <tr>
+                <td style="font-weight:900; color:#f8fafc;">House ${h}</td>
+                <td style="font-weight:700; color:#cbd5e1;">${signLord}</td>
+                <td>${isNaN(valDPT) ? "---" : valDPT}</td>
+                <td style="font-weight:700; color:#cbd5e1;">${nakLord}</td>
+                <td>${isNaN(valDLP) ? "---" : valDLP}</td>
+                <td style="font-weight:900; color:#fde047; letter-spacing:1px;">${relationStr}</td>
+                <td style="font-weight:900; color:${resultColor};">${resultStr}</td>
+            </tr>
+        `;
+    }
+    
+    // Update the Good / Bad Summary Bar
+    const summaryBar = document.getElementById("table6SummaryBar");
+    if(summaryBar) {
+        summaryBar.querySelector(".house-summary-good").textContent = "GOOD : " + (goodHouses.length > 0 ? goodHouses.join(",") : "—");
+        summaryBar.querySelector(".house-summary-bad").textContent = "BAD : " + (badHouses.length > 0 ? badHouses.join(",") : "—");
+    }
+
+    // Calculate and display Navamsha relative to ALP
+    if (typeof computeALPAbs === 'function') {
+        const alpAbs = computeALPAbs();
+        if (alpAbs !== null && !isNaN(alpAbs)) {
+            const NAK_SIZE = 360 / 27;
+            const PADA_SIZE = 360 / 108;
+            const nIdx = Math.floor(alpAbs / NAK_SIZE);
+            const pIdx = Math.floor((alpAbs % NAK_SIZE) / PADA_SIZE) + 1;
+            
+            // Find absolute Navamsha sign
+            const navamshaIndex = (((nIdx % 9) * 4) + (pIdx - 1)) % 12;
+            const navamshaSign = SIGNS[navamshaIndex];
+            
+            // Find relative house from ALP
+            const alpSignIndex = Math.floor(alpAbs / 30);
+            const navamshaHouse = ((navamshaIndex - alpSignIndex + 12) % 12) + 1;
+            
+            const navSummary = document.getElementById("table6NavamshaSummary");
+            if (navSummary) {
+                navSummary.textContent = `NAVAMSHA (D9) :: ${navamshaSign.toUpperCase()} :: ${navamshaHouse}`;
+            }
+        }
+    }
+
+    // Restore persistent highlights for Table 6 after it rebuilds asynchronously
+    if (typeof applyStoredHighlights === 'function') {
+        setTimeout(applyStoredHighlights, 10);
+    }
+}
+
+/* =========================================================
+   TABLE-6 HOOK: ENSURE IT RUNS AFTER T3 & T4 RENDER
+   ========================================================= */
+if(!window.__TABLE6_DISTANCE_HOOK__){
+    window.__TABLE6_DISTANCE_HOOK__ = true;
+    const _origRecalcT6 = recalc;
+    
+    recalc = function(){
+        _origRecalcT6();
+        
+        // Timeout ensures the DOM is fully populated by T3 & T4 before scraping
+        setTimeout(()=>{
+            if(typeof buildTable6Distance === "function"){
+                buildTable6Distance();
+            }
+        }, 50); 
+    };
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="table-8-kp" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-8 : PLANET STAR–SUB LORD ANALYSIS (KP)
+</h2>
+
+<div id="table8KpWrapper" class="collapsed">
+
+  <div style="text-align:center; margin-top:15px; margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:24px; flex-wrap:wrap; background: linear-gradient(180deg, #020617, #020617dd); border: 1px solid #334155; padding: 12px 20px; border-radius: 12px;">
+    
+    <label style="font-weight:800;color:#facc15; display:flex; align-items:center; gap:8px;">
+      Sort Planet :
+      <select id="table8SortPlanet" style="padding:6px 14px;border-radius:8px;font-weight:800; background:#020617; color:#facc15; border:1px solid #a16207;">
+        <option value="">Default Order</option>
+        <option>Surya</option>
+        <option>Chandra</option>
+        <option>Mangala</option>
+        <option>Rahu</option>
+        <option>Guru</option>
+        <option>Shani</option>
+        <option>Budha</option>
+        <option>Ketu</option>
+        <option>Shukra</option>
+      </select>
+    </label>
+
     <label style="color:#facc15; font-weight:800; font-size:16px; display:inline-flex; align-items:center; gap:8px;">
       Transit :
-      <input type="date" id="transitDateTable5" style="background:#020617; color:#f8fafc; border:1px solid #a16207; border-radius:8px; padding:6px 12px; font-weight:bold; color-scheme: dark;">
+      <input type="date" id="transitDateTable8" style="background:#020617; color:#f8fafc; border:1px solid #a16207; border-radius:8px; padding:6px 12px; font-weight:bold; color-scheme: dark;">
+    </label>
+
+    <label style="color:#34d399; font-weight:800; font-size:16px; display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+      <input type="checkbox" id="removeOccupiedT8" checked onchange="if(typeof buildTable3 === 'function') buildTable3()">
+      [✔] Remove Occupied
     </label>
   </div>
+
+  <script>
+    // Forces the transit date in Table 8 to auto-fill to today's date if empty
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('transitDateTable8').value = new Date().toISOString().split("T")[0];
+    });
+  </script>
 
   <div id="table3-shell" style="margin-top:20px;"></div>
 </div>
@@ -4779,10 +5077,34 @@ function buildPlanetBoxT3(planet){
       if (window.activeVimLords.antara === planet) badgesHtml += `<span class="vim-badge badge-antara">ANTARA</span>`;
   }
 
+  // --- CALCULATE OCCUPIED HOUSES (KP RULE - 2 OR MORE PLANETS ONLY) ---
+      let occupiedHouses = new Set();
+      const removeOccupied = document.getElementById("removeOccupiedT8")?.checked;
+	  
+	  
+  if (removeOccupied) {
+      const KP_PLANETS = ["Surya", "Chandra", "Mangala", "Budha", "Guru", "Shukra", "Shani", "Rahu", "Ketu"];
+      let houseCounts = {};
+      
+      KP_PLANETS.forEach(p => {
+          let pAbs = null;
+          if (p === "Rahu") pAbs = RAHU_ABS_CURRENT;
+          else if (p === "Ketu") pAbs = RAHU_ABS_CURRENT !== null ? (RAHU_ABS_CURRENT + 180) % 360 : null;
+          else if (data[p]?.sign) pAbs = absDeg(data[p].sign, +data[p].deg, +data[p].min, +data[p].sec);
 
-
-
-
+          if (pAbs !== null) {
+              let h = getHouseFromALP(pAbs);
+              if (h) houseCounts[h] = (houseCounts[h] || 0) + 1;
+          }
+      });
+      
+      Object.keys(houseCounts).forEach(h => {
+          // 🔥 CORRECTED RULE: Only remove if TWO OR MORE planets are in the house
+          if (houseCounts[h] >= 2) {
+              occupiedHouses.add(Number(h));
+          }
+      });
+  }
 
 let html = `
   <table style="margin-bottom:42px;">
@@ -4824,7 +5146,14 @@ let html = `
         if(r.p==="Ketu" && RAHU_ABS_CURRENT !== null) { abs2 = (RAHU_ABS_CURRENT + 180) % 360; }
         placed = getHouseFromALP(abs2);
       }
-      finalV = [...new Set([...lords, placed].filter(Boolean))].sort((a,b)=>a-b);
+      
+      // --- APPLY REMOVE OCCUPIED LOGIC (Only affects Final) ---
+      let effectiveLords = lords;
+      if (removeOccupied) {
+          effectiveLords = lords.filter(h => !occupiedHouses.has(h));
+      }
+
+      finalV = [...new Set([...effectiveLords, placed].filter(Boolean))].sort((a,b)=>a-b);
       aspects = getAspectHousesT3(r.p, placed);
       sum = [...new Set([...finalV, ...aspects])].sort((a,b)=>a-b);
     }
@@ -4911,6 +5240,10 @@ let html = `
 
 
 
+
+
+
+
 /* =========================================================
    PART 5.4 : BUILD TABLE-3 (9 PLANET BOXES)
    ========================================================= */
@@ -4931,7 +5264,7 @@ function buildTable3(){
 	  "Guru","Shani","Budha","Ketu","Shukra"
 	];
 
-	const sel = document.getElementById("table5SortPlanet");
+	const sel = document.getElementById("table8SortPlanet");
 	const selected = sel && sel.value ? sel.value : "";
 
 	let order = [...defaultOrder];
@@ -4983,7 +5316,7 @@ if(!window.__T3_HOOKED__){
 
 <script>
 document
-  .getElementById("table5SortPlanet")
+  .getElementById("table8SortPlanet")
   ?.addEventListener("change", ()=>{
     if(typeof buildTable3 === "function"){
       buildTable3();
@@ -5191,20 +5524,11 @@ function applyPlanetLegends(){
      TABLE-6 : RASI → RASI PRE CALCULATED DATES
      ========================================================= -->
 
-<h2 id="table-6" style="
-  margin-top:40px;
-  margin-bottom:14px;
-  text-align:center;
-  color:#fde047;
-  font-weight:900;
-  letter-spacing:2px;
-  text-shadow:0 0 12px #92400e;
-  cursor:pointer;
-">
-TABLE-6 : RASI → RASI DATES (ALP)
+<h2 id="table-9" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-9 : RASI → RASI DATES (ALP)
 </h2>
 
-<div id="table6Wrapper" class="collapsed">
+<div id="table9Wrapper" class="collapsed">
   <div id="currentRasiStatus"
        style="text-align:center;color:#facc15;font-weight:800;margin-bottom:8px;">
     Currently Running Rasi : —
@@ -5236,20 +5560,14 @@ TABLE-6 : RASI → RASI DATES (ALP)
      TABLE-7 : NAKSHATRA → PADA PRE CALCULATED DATES
      ========================================================= -->
 
-<h2 id="table-7" style="
-  margin-top:40px;
-  margin-bottom:14px;
-  text-align:center;
-  color:#86efac;
-  font-weight:900;
-  letter-spacing:2px;
-  text-shadow:0 0 12px #064e3b;
-  cursor:pointer;
-">
-TABLE-7 : NAKSHATRA → PADA DATES (ALP)
+<h2 id="table-10" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-10 : NAKSHATRA → PADA DATES (ALP)
 </h2>
 
-<div id="table7Wrapper" class="collapsed">
+
+
+
+<div id="table10Wrapper" class="collapsed">
 <div id="currentPadaStatus"
      style="text-align:center;color:#facc15;font-weight:800;margin-bottom:8px;">
   Currently Running Nakshatra : —
@@ -5943,10 +6261,10 @@ swissFileInput.onchange = e=>{
   <button class="nav-btn" onclick="jumpTo('table-2')">2</button>
   <button class="nav-btn" onclick="jumpTo('table-3')">3</button>
   <button class="nav-btn" onclick="jumpTo('table-4')">4</button>
-  <button class="nav-btn" onclick="jumpTo('table-5')">5</button>
-  <button class="nav-btn" onclick="jumpTo('table-6')">6</button>
-  <button class="nav-btn" onclick="jumpTo('table-7')">7</button>
-  <button class="nav-btn" onclick="jumpTo('table-8')">8</button>
+  <button class="nav-btn" onclick="jumpTo('table-8')">8V</button>
+  <button class="nav-btn" onclick="jumpTo('table-8-kp')">8K</button>
+  <button class="nav-btn" onclick="jumpTo('table-9')">9</button>
+  <button class="nav-btn" onclick="jumpTo('table-10')">10</button>
 
 </div>
 
@@ -6007,17 +6325,25 @@ function resetToToday(){
     document.getElementById("table1ContentWrapper")?.classList.toggle("collapsed");
   });
 
-  document.getElementById("table-5")?.addEventListener("click", ()=>{
-    document.getElementById("table5Wrapper")?.classList.toggle("collapsed");
-  });
-
   // NEW: Table 6 Toggle
-  document.getElementById("table-6")?.addEventListener("click", ()=>{
-    document.getElementById("table6Wrapper")?.classList.toggle("collapsed");
+  document.getElementById("table-6-distance")?.addEventListener("click", ()=>{
+    const wrapper = document.getElementById("table6DistanceWrapper");
+    wrapper?.classList.toggle("collapsed");
+    const icon = document.getElementById('t6ToggleIcon');
+    if (icon) icon.textContent = wrapper.classList.contains('collapsed') ? '▶' : '▼';
   });
 
-  document.getElementById("table-7")?.addEventListener("click", ()=>{
-    document.getElementById("table7Wrapper")?.classList.toggle("collapsed");
+  document.getElementById("table-8-kp")?.addEventListener("click", ()=>{
+    document.getElementById("table8KpWrapper")?.classList.toggle("collapsed");
+  });
+
+  // NEW: Table 9 Toggle
+  document.getElementById("table-9")?.addEventListener("click", ()=>{
+    document.getElementById("table9Wrapper")?.classList.toggle("collapsed");
+  });
+
+  document.getElementById("table-10")?.addEventListener("click", ()=>{
+    document.getElementById("table10Wrapper")?.classList.toggle("collapsed");
   });
 })();
 
@@ -6072,9 +6398,15 @@ function jumpTo(id){
 
 
 
-<h2 id="nav_dasha" style="text-align:center; cursor:pointer;" onclick="toggleVim()">
-    VIMSHOTTARI DASHA
+<h2 id="nav_dasha" onclick="toggleVim()" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase;">
+TABLE-11 : VIMSHOTTARI DASHA
 </h2>
+
+
+
+
+
+
 
 <div id="vimContainer" style="display:flex; flex-direction:column; align-items:center; width:100%;">
     
@@ -6635,7 +6967,7 @@ const VIM_TO_T5_PLANET = {
     "Ma": "Mangala", "Ra": "Rahu", "Ju": "Guru", "Sa": "Shani", "Bu": "Budha"
 };
 
-function syncTable5WithVimshottari() {
+function syncTable8WithVimshottari() {
     // ALWAYS force the check against the master Transit Date! Ignore Find Date.
     const transitVal = document.getElementById("transitDate")?.value;
     const dateToCheck = transitVal ? new Date(transitVal + "T00:00:00") : new Date();
@@ -6691,7 +7023,7 @@ function findVimDate(){
       
       highlightTodayVim();
       highlightRunningMahaInTable();
-      syncTable5WithVimshottari(); // Call without arguments so it defaults to Transit
+      syncTable8WithVimshottari(); 
   }, 150); 
 }
 
@@ -6749,7 +7081,7 @@ function renderBothDashas() {
     
     highlightTodayVim();
     highlightRunningMahaInTable();
-    syncTable5WithVimshottari(); // Initial Sync on Load
+    syncTable8WithVimshottari(); // Initial Sync on Load
 }
 
 
@@ -6788,12 +7120,12 @@ window.addEventListener("load", () => {
                 renderBothDashas();
             } else {
                 // Background badge syncing: If Dasha panel is closed, 
-                // still run Chandra calc silently so Table 5 badges ALWAYS update on transit!
+                // still run Chandra calc silently so Table 8 badges ALWAYS update on transit!
                 if(typeof getAbsDeg === "function"){
                     let chandraDeg = getAbsDeg("Chandra");
                     if(chandraDeg !== null) buildFullDasha("vimChandra", chandraDeg);
                 }
-                syncTable5WithVimshottari();
+                syncTable8WithVimshottari();
             }
         };
     }
@@ -7181,11 +7513,11 @@ window.toggleMixerSync = function() {
 
 
 
-<h2 id="mixer-heading" style="margin-top: 60px; margin-bottom: 14px; text-align: center; color: #facc15; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px #92400e; cursor: pointer; user-select: none;">
-  TRANSIT - NATAL MIXER KUNDALI <span id="mToggleIcon" style="font-size: 16px; margin-left: 8px;">▼</span>
+<h2 id="mixer-heading" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase; user-select: none;">
+  TABLE-12 : TRANSIT NATAL MIXER KUNDALI <span id="mToggleIcon" style="font-size: 16px; margin-left: 8px;">▶</span>
 </h2>
 
-<div id="mixerWrapper">
+<div id="mixerWrapper" class="collapsed">
   
   <div class="mixer-controls-bar" style="flex-direction: column; padding: 12px 18px;">
       
@@ -7328,7 +7660,23 @@ window.toggleMixerSync = function() {
       </table>
   </div>
 
-  <script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
   /* =========================================================
      TRINAL STARLORD ENGINE (UNIFIED TABLE WITH API SYNC FIX)
      ========================================================= */
@@ -7342,11 +7690,14 @@ window.toggleMixerSync = function() {
       if (alpAbs === null || isNaN(alpAbs)) return;
 
       const nakSize = 360 / 27;
+      const padaSize = 360 / 108;
 
-      function getNakLordForALPHouse(houseNum) {
+      // Dynamically calculates the Lord AND the active Pada based on the moving ALP
+      function getNakLordAndPadaForALPHouse(houseNum) {
           const deg = ((alpAbs + (houseNum - 1) * 30) % 360 + 360) % 360;
           const nIndex = Math.floor(deg / nakSize);
-          return LORD_MAP[NAKSHATRAS[nIndex][1]];
+          const pIndex = Math.floor((deg % nakSize) / padaSize) + 1;
+          return { lord: LORD_MAP[NAKSHATRAS[nIndex][1]], pada: pIndex };
       }
 
       // Finds the house of the planet in the NATAL chart relative to Natal ALP
@@ -7363,13 +7714,9 @@ window.toggleMixerSync = function() {
           if(!tData || !tData.planets || tData.planets[planetName] === undefined) return "---";
           
           const tAbs = tData.planets[planetName];
-          
-          // Use the mathematical transit ALP generated from the cloud fetcher
           const tAlp = (tData.alp !== null && tData.alp !== undefined) ? tData.alp : computeALPAbs();
-          
           const hs = typeof getActiveSys === 'function' ? getActiveSys() : "Sign2Sign";
           
-          // Safe degree wrapping to prevent index errors
           const safeAlp = ((tAlp % 360) + 360) % 360;
           const safeAbs = ((tAbs % 360) + 360) % 360;
           
@@ -7390,27 +7737,32 @@ window.toggleMixerSync = function() {
           return house;
       }
 
-      const p159 = getNakLordForALPHouse(1);
-      const p2610 = getNakLordForALPHouse(2);
-      const p3711 = getNakLordForALPHouse(3);
-      const p4812 = getNakLordForALPHouse(4);
+      const trine1 = getNakLordAndPadaForALPHouse(1);
+      const trine2 = getNakLordAndPadaForALPHouse(2);
+      const trine3 = getNakLordAndPadaForALPHouse(3);
+      const trine4 = getNakLordAndPadaForALPHouse(4);
 
-      const sl159 = getStarLordT3(p159) || "---";
-      const sl2610 = getStarLordT3(p2610) || "---";
-      const sl3711 = getStarLordT3(p3711) || "---";
-      const sl4812 = getStarLordT3(p4812) || "---";
+      const sl159 = getStarLordT3(trine1.lord) || "---";
+      const sl2610 = getStarLordT3(trine2.lord) || "---";
+      const sl3711 = getStarLordT3(trine3.lord) || "---";
+      const sl4812 = getStarLordT3(trine4.lord) || "---";
 
-      const renderRow = (entity, planet, starlord) => {
-          // Strictly pull the same planet and same starlord for both Natal and Transit
-          const pNatal = getNatalHouse(planet);
-          const pTransit = getTransitHouse(planet);
+      const renderRow = (entity, planetName, starlord, explicitPada) => {
+          const pNatal = getNatalHouse(planetName);
+          const pTransit = getTransitHouse(planetName);
           const slNatal = starlord !== "---" ? getNatalHouse(starlord) : "---";
           const slTransit = starlord !== "---" ? getTransitHouse(starlord) : "---";
+
+          // Format the display string for the Planet column to include the Pada
+          let displayPlanet = planetName;
+          if (explicitPada !== undefined && explicitPada !== "") {
+              displayPlanet = `${planetName} - ${explicitPada}`;
+          }
 
           return `<tr>
               <td style="font-weight:900; color:#34d399; font-size:16px; padding:12px; text-align:center; border-right: 1px solid #334155;">${entity}</td>
               
-              <td style="font-weight:700; color:#f8fafc; font-size:16px; padding:12px; text-align:center; border-right: 1px solid #334155;">${planet}</td>
+              <td style="font-weight:700; color:#f8fafc; font-size:16px; padding:12px; text-align:center; border-right: 1px solid #334155;">${displayPlanet}</td>
               <td style="font-weight:900; color:#cbd5e1; font-size:16px; padding:12px; text-align:center; background: rgba(0,0,0,0.3); border-right: 1px solid #334155;">${pNatal}</td>
               <td style="font-weight:900; color:#fca5a5; font-size:16px; padding:12px; text-align:center; background: rgba(127,29,29,0.15); border-right: 3px solid #64748b;">${pTransit}</td>
               
@@ -7420,12 +7772,33 @@ window.toggleMixerSync = function() {
           </tr>`;
       };
       
-      // Compare output to stop DOM flashing
       let newHtml = "";
-      newHtml += renderRow("1-5-9", p159, sl159);
-      newHtml += renderRow("2-6-10", p2610, sl2610);
-      newHtml += renderRow("3-7-11", p3711, sl3711);
-      newHtml += renderRow("4-8-12", p4812, sl4812);
+      
+      // 1. Render the primary 4 trinal groups (These Padas will dynamically change with ALP)
+      newHtml += renderRow("1-5-9", trine1.lord, sl159, trine1.pada);
+      newHtml += renderRow("2-6-10", trine2.lord, sl2610, trine2.pada);
+      newHtml += renderRow("3-7-11", trine3.lord, sl3711, trine3.pada);
+      newHtml += renderRow("4-8-12", trine4.lord, sl4812, trine4.pada);
+      
+      // 2. Identify the remaining 5 planets and render them
+      const allPlanets = ["Ketu", "Shukra", "Surya", "Chandra", "Mangala", "Rahu", "Guru", "Shani", "Budha"];
+      const usedPlanets = [trine1.lord, trine2.lord, trine3.lord, trine4.lord];
+      const remainingPlanets = allPlanets.filter(p => !usedPlanets.includes(p));
+      
+      remainingPlanets.forEach(planet => {
+          const starlord = getStarLordT3(planet) || "---";
+          
+          // Fallback to the planet's static natal pada for formatting consistency
+          let natalPada = "";
+          if (typeof getPlanetAbs === 'function') {
+              const pAbs = getPlanetAbs(planet);
+              if (pAbs !== null && !isNaN(pAbs)) {
+                  natalPada = (Math.floor(pAbs / padaSize) % 4) + 1;
+              }
+          }
+          
+          newHtml += renderRow("---", planet, starlord, natalPada);
+      });
       
       if (tbody.innerHTML !== newHtml) {
           tbody.innerHTML = newHtml;
@@ -7444,9 +7817,6 @@ window.toggleMixerSync = function() {
       };
   }
   </script>
-  
-  
-  
   
   
   
@@ -8203,6 +8573,538 @@ if (!window.__MIXER_KUNDALI_HOOK_V5__) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+<style>
+  /* Matchmaking Specific Styles */
+  #matchmakingWrapper {
+      overflow: hidden; 
+      transition: max-height 0.6s ease, opacity 0.4s ease; 
+      max-height: 8000px; 
+      opacity: 1; 
+      margin-bottom: 60px;
+      width: 100%;
+  }
+  #matchmakingWrapper.collapsed { 
+      max-height: 0; 
+      opacity: 0; 
+  }
+  
+  .mm-timeline-table {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto 30px auto;
+      border-collapse: collapse;
+      background: linear-gradient(180deg, #020617, #020617cc);
+      border: 1px solid #334155;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  }
+  
+  .mm-timeline-table th {
+      background: linear-gradient(180deg, #1e293b, #020617);
+      color: #facc15;
+      font-size: 15px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #334155;
+  }
+  
+  .mm-timeline-table td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #334155;
+      font-weight: normal; /* Normal font weight for readability */
+      font-size: 15px;
+      color: #f8fafc;
+  }
+  
+  /* Parrot Green for Good, Crimson Red for Bad */
+  .mm-good-row { background: rgba(50, 205, 50, 0.15); color: #32cd32; }
+  .mm-bad-row { background: rgba(220, 20, 60, 0.2); color: #dc143c; }
+
+  /* Yellow Outline Box for Currently Running Date */
+  .mm-current-row td {
+      border-top: 2px solid #facc15 !important;
+      border-bottom: 2px solid #facc15 !important;
+      background: rgba(250, 204, 21, 0.1) !important;
+  }
+  .mm-current-row td:first-child { border-left: 2px solid #facc15 !important; }
+  .mm-current-row td:last-child { border-right: 2px solid #facc15 !important; }
+</style>
+
+<h2 id="matchmakingHeading" style="margin-top:40px; margin-bottom:14px; text-align:center; color:#facc15; font-weight:900; font-size:24px; letter-spacing:2px; text-shadow:0 0 12px #92400e; cursor:pointer; text-transform:uppercase; user-select: none;">
+  TABLE-13 : DLP MATCH MAKING <span id="mmToggleIcon" style="font-size: 16px; margin-left: 8px;">▶</span>
+</h2>
+
+<div id="matchmakingWrapper" class="collapsed">
+  
+  <div class="mixer-controls-bar" style="flex-direction: column; padding: 16px 22px; margin-bottom: 30px; margin-left: auto; margin-right: auto; max-width: 1400px; background: linear-gradient(180deg, #020617, #020617dd); border: 1px solid #334155; border-radius: 12px; box-shadow: 0 0 16px rgba(250,204,21,.15);">
+      <div style="display:flex; gap:20px; justify-content:center; align-items:center; width:100%; flex-wrap:wrap;">
+          
+          <button class="mixer-btn" style="background:linear-gradient(135deg, #10b981, #047857); border-color:#34d399; color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 900; cursor: pointer;" onclick="document.getElementById('mmPartnerJsonInput').click()">
+            Load Partner Profile
+          </button>
+          <input type="file" id="mmPartnerJsonInput" accept=".json" style="display:none;" onchange="loadMatchmakingPartner(event)">
+
+          <div class="checkbox-group" style="font-size:15px; padding:8px 16px; background:#020617; border: 1px solid #a16207; border-radius: 8px; color: #fff; display: flex; gap: 15px;">
+              <span style="color:#fde047; margin-right: 10px; font-weight: bold;">Primary Chart Is:</span>
+              <label style="cursor:pointer; color:#60a5fa; font-weight: bold;">
+                <input type="radio" name="mmPrimaryGender" value="M" checked onchange="renderMatchmakingCharts()"> Male
+              </label>
+              <label style="cursor:pointer; color:#f43f5e; font-weight: bold;">
+                <input type="radio" name="mmPrimaryGender" value="F" onchange="renderMatchmakingCharts()"> Female
+              </label>
+          </div>
+          
+          <span id="mmStatus" style="color:#34d399; font-weight:bold; font-size:15px; min-width:180px; text-align:center;"></span>
+      </div>
+  </div>
+
+  <div class="mixer-split-layout" style="display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 40px; width: 100%; padding: 0 40px; margin-bottom: 50px;">
+      
+      <div class="chart-wrapper" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <h4 style="color:#60a5fa; margin-bottom: 15px; font-size: 22px; text-transform: uppercase; letter-spacing: 2px;">MALE CHART</h4>
+          <div class="mixer-plain-kundali" id="mmMaleGrid" style="border-color: #1e3a8a; background: #050510;">
+              <div class="kundali-center" style="color: #60a5fa; background:#000;">MALE</div> 
+              <div class="rasi-box pos-Pisces" id="mm-m-Pisces"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Aries" id="mm-m-Aries"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Taurus" id="mm-m-Taurus"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Gemini" id="mm-m-Gemini"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Cancer" id="mm-m-Cancer"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Leo" id="mm-m-Leo"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Virgo" id="mm-m-Virgo"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Libra" id="mm-m-Libra"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Scorpio" id="mm-m-Scorpio"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Sagittarius" id="mm-m-Sagittarius"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Capricorn" id="mm-m-Capricorn"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Aquarius" id="mm-m-Aquarius"><div class="rasi-planets"></div></div>
+          </div>
+      </div>
+      
+      <div class="chart-wrapper" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <h4 style="color:#f43f5e; margin-bottom: 15px; font-size: 22px; text-transform: uppercase; letter-spacing: 2px;">FEMALE CHART</h4>
+          <div class="mixer-plain-kundali" id="mmFemaleGrid" style="border-color: #9f1239; background: #1a0505;">
+              <div class="kundali-center" style="color: #f43f5e; background:#000;">FEMALE</div> 
+              <div class="rasi-box pos-Pisces" id="mm-f-Pisces"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Aries" id="mm-f-Aries"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Taurus" id="mm-f-Taurus"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Gemini" id="mm-f-Gemini"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Cancer" id="mm-f-Cancer"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Leo" id="mm-f-Leo"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Virgo" id="mm-f-Virgo"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Libra" id="mm-f-Libra"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Scorpio" id="mm-f-Scorpio"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Sagittarius" id="mm-f-Sagittarius"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Capricorn" id="mm-f-Capricorn"><div class="rasi-planets"></div></div>
+              <div class="rasi-box pos-Aquarius" id="mm-f-Aquarius"><div class="rasi-planets"></div></div>
+          </div>
+      </div>
+  </div>
+
+  <h3 style="color:#fde047; margin-bottom: 10px; font-size: 22px; letter-spacing: 1px; text-align: center; text-transform: uppercase;">
+      Matchmaking Rasi → Rasi Timeline (Female Relative)
+  </h3>
+  
+  <div style="display:flex; justify-content:center; gap: 20px; margin-bottom: 10px;">
+      <label style="color:#60a5fa; font-weight:bold; cursor:pointer; font-size: 16px;">
+          <input type="radio" name="mmCalcMode" value="sign" checked onchange="renderMatchmakingCharts()"> Sign Wise
+      </label>
+      <label style="color:#f43f5e; font-weight:bold; cursor:pointer; font-size: 16px;">
+          <input type="radio" name="mmCalcMode" value="degree" onchange="renderMatchmakingCharts()"> Degree Wise
+      </label>
+  </div>
+
+  <div style="width: 100%; display: flex; justify-content: center; padding: 0 20px;">
+      <table class="mm-timeline-table">
+          <thead>
+              <tr>
+                  <th style="width: 15%;">From Date</th>
+                  <th style="width: 15%;">To Date</th>
+                  <th>Duration</th>
+                  <th style="color: #f43f5e;">Female ALP</th>
+                  <th style="color: #60a5fa;">Male ALP</th>
+                  <th>Distance (F → M)</th>
+              </tr>
+          </thead>
+          <tbody id="mmTimelineBody">
+              <tr><td colspan="6" style="color: #94a3b8; padding: 20px;">Load a partner chart to generate the matching timeline.</td></tr>
+          </tbody>
+      </table>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   MATCH MAKING LOGIC ENGINE + TIMELINE GENERATOR
+   ========================================================= */
+
+window.mmPartnerData = []; 
+window.mmPartnerInfo = null; 
+
+document.getElementById('matchmakingHeading')?.addEventListener('click', function() {
+  const wrapper = document.getElementById('matchmakingWrapper');
+  wrapper.classList.toggle('collapsed');
+  document.getElementById('mmToggleIcon').textContent = wrapper.classList.contains('collapsed') ? '▶' : '▼';
+});
+
+function getPrimaryChartItems() {
+    let items = [];
+    const planetList = ["Surya", "Chandra", "Mangala", "Budha", "Guru", "Shukra", "Shani", "Rahu", "Ketu"];
+    planetList.forEach(p => {
+        if (typeof getPlanetAbs === 'function') {
+            const abs = getPlanetAbs(p);
+            if (abs !== null && !isNaN(abs)) items.push({ name: p, abs: abs, isRetro: (typeof PLANET_RETRO !== 'undefined' && PLANET_RETRO[p]) });
+        }
+    });
+
+    const bSign = document.getElementById("birthSign")?.value;
+    const bDeg = document.getElementById("birthDeg")?.value;
+    const bMin = document.getElementById("birthMin")?.value;
+    if (bSign && bDeg !== "") {
+        const ascAbs = (SIGNS.indexOf(bSign) * 30) + parseInt(bDeg) + (parseInt(bMin || 0)/60);
+        items.push({ name: "ASC", abs: ascAbs, isAsc: true });
+    }
+
+    if (typeof computeALPAbs === 'function') {
+        const alpAbs = computeALPAbs();
+        if (alpAbs !== null && !isNaN(alpAbs)) items.push({ name: "ALP", abs: alpAbs, isAlp: true });
+    }
+    return items;
+}
+
+async function loadMatchmakingPartner(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    
+    const reader = new FileReader();
+    const status = document.getElementById("mmStatus");
+    status.innerText = "Parsing Profile...";
+
+    reader.onload = async function(e) {
+        try {
+            const profile = JSON.parse(e.target.result);
+            status.innerText = "Connecting to Engine... ⏳";
+
+            let dob = "", tob = "12:00:00", lat = "", lon = "";
+
+            if (profile.coords) { lat = profile.coords.lat; lon = profile.coords.lon; } 
+            else { lat = profile.lat || profile.latitude; lon = profile.lon || profile.longitude; }
+
+            if (profile.date && typeof profile.date === 'object') {
+                dob = `${profile.date.y}-${String(profile.date.m).padStart(2, '0')}-${String(profile.date.d).padStart(2, '0')}`;
+            } else { dob = profile.dob || profile.date; }
+
+            if (profile.time && typeof profile.time === 'object') {
+                tob = `${String(profile.time.h).padStart(2, '0')}:${String(profile.time.min).padStart(2, '0')}:${String(profile.time.sec || 0).padStart(2, '0')}`;
+            } else if (profile.tob || typeof profile.time === 'string') {
+                tob = profile.tob || profile.time;
+                if(tob.split(":").length === 2) tob += ":00"; 
+            }
+            
+            if (!dob || !lat || !lon) {
+                status.innerHTML = "<span style='color:#ef4444;'>Error: Invalid Profile</span>";
+                return;
+            }
+
+            const [y, m, d] = dob.split("-").map(Number);
+            const [hr, min, sec] = tob.split(":").map(Number);
+
+            const requestData = {
+                year: y, month: m, day: d, 
+                hour: hr, minute: min, second: sec || 0,
+                lat: parseFloat(lat), lon: parseFloat(lon),
+                timezone_offset: 330, horary_mode: false, ayanamsha: "kp_new"
+            };
+
+            const response = await fetch('https://donnie-astro-engine.onrender.com/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === "success") {
+                window.mmPartnerData = []; 
+                const tp = result.data.planets;
+                const rt = result.data.planets_retro || {};
+                
+                window.mmPartnerInfo = {
+                    dob: new Date(y, m-1, d),
+                    lagnaAbs: ((result.data.lagna % 360) + 360) % 360
+                };
+
+                Object.keys(tp).forEach(raw => {
+                    const internal = (typeof SWISS_TO_INTERNAL_PLANET_MAP !== 'undefined') ? SWISS_TO_INTERNAL_PLANET_MAP[raw] : null;
+                    if(internal) {
+                        window.mmPartnerData.push({ name: internal, abs: ((tp[raw] % 360) + 360) % 360, isRetro: !!rt[raw] });
+                    }
+                });
+
+                if(tp["Rahu_true"] === undefined && tp["Rahu"]) {
+                    if(!window.mmPartnerData.find(x => x.name === "Rahu")) window.mmPartnerData.push({ name: "Rahu", abs: ((tp["Rahu"] % 360) + 360) % 360 });
+                    if(!window.mmPartnerData.find(x => x.name === "Ketu")) window.mmPartnerData.push({ name: "Ketu", abs: ((tp["Ketu"] % 360) + 360) % 360 });
+                }
+
+                if (typeof result.data.lagna === "number") {
+                    window.mmPartnerData.push({ name: "ASC", abs: ((result.data.lagna % 360) + 360) % 360, isAsc: true });
+                }
+
+                const mainTransit = document.getElementById("transitDate")?.value;
+                if(mainTransit && typeof result.data.lagna === "number") {
+                    const dobTime = window.mmPartnerInfo.dob;
+                    const targetTime = new Date(mainTransit + "T12:00:00");
+                    const days = (targetTime - dobTime) / 86400000;
+                    const pAlpAbs = (window.mmPartnerInfo.lagnaAbs + (days * (3/365.25)) + 360) % 360;
+                    window.mmPartnerData.push({ name: "ALP", abs: pAlpAbs, isAlp: true });
+                }
+
+                status.innerHTML = "<span style='color:#34d399;'>Partner Loaded ✓</span>";
+                setTimeout(() => { status.innerHTML = ""; }, 3000);
+                renderMatchmakingCharts();
+                
+            } else {
+                status.innerHTML = "<span style='color:#ef4444;'>API Error</span>";
+            }
+
+        } catch (error) {
+            console.error("Server Fetch Error:", error);
+            status.innerHTML = `<span style='color:#ef4444;'>Network Error</span>`;
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; 
+}
+
+function renderMatchmakingCharts() {
+    const primaryIsMale = document.querySelector('input[name="mmPrimaryGender"]:checked').value === "M";
+    const primaryItems = getPrimaryChartItems();
+    const partnerItems = window.mmPartnerData || [];
+    
+    const maleItems = primaryIsMale ? primaryItems : partnerItems;
+    const femaleItems = primaryIsMale ? partnerItems : primaryItems;
+
+    function buildTokensHTML(items, signName, isMale) {
+        let inSignItems = items.filter(item => {
+            if (item.abs === null || isNaN(item.abs)) return false;
+            return SIGNS[Math.floor(item.abs / 30)] === signName;
+        });
+        
+        const ascendingSigns = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo"];
+        inSignItems.sort((a, b) => {
+            return ascendingSigns.includes(signName) ? (a.abs % 30) - (b.abs % 30) : (b.abs % 30) - (a.abs % 30);
+        });
+
+        return inSignItems.map(item => {
+            const rawDeg = item.abs % 30;
+            const deg = Math.floor(rawDeg);
+            const min = Math.floor((rawDeg - deg) * 60).toString().padStart(2, '0');
+            let rHtml = item.isRetro ? " <span style='color:#ef4444; font-weight:900;'>℞</span>" : "";
+
+            let bg = isMale ? "#1e3a8a" : "#9f1239";
+            let color = "#fff";
+            let border = isMale ? "1px solid #60a5fa" : "1px solid #fb7185";
+            let text = item.name;
+
+            if (item.isAsc) {
+                bg = isMale ? "#1e3a8a" : "#9f1239"; border = isMale ? "1px solid #60a5fa" : "1px solid #fb7185"; color = "#fff";
+            } else if (item.isAlp) {
+                bg = "#1d4ed8"; border = "2px solid #93c5fd"; color = "#fff"; text = "ALP";
+            } else {
+                bg = "#000"; border = "1px solid #facc15"; color = "#facc15";
+            }
+
+            return `<div class="p-token-v5" style="background:${bg}; color:${color}; border:${border}; text-shadow:none;">
+                ${text} <span style="font-family:monospace; margin-left:4px; ${(!item.isAsc && !item.isAlp) ? 'color:#fde047;' : 'color:#fff;'}">${deg}°${min}'</span>${rHtml}
+            </div>`;
+        }).join('');
+    }
+
+    if (typeof SIGNS !== 'undefined') {
+        SIGNS.forEach(sign => {
+            const mBox = document.querySelector(`#mm-m-${sign} .rasi-planets`);
+            const fBox = document.querySelector(`#mm-f-${sign} .rasi-planets`);
+            if (mBox) mBox.innerHTML = buildTokensHTML(maleItems, sign, true);
+            if (fBox) fBox.innerHTML = buildTokensHTML(femaleItems, sign, false);
+        });
+    }
+
+    generateMatchmakingTimeline(primaryIsMale);
+}
+
+// ---------------------------------------------------------
+// TIMELINE GENERATOR (FEMALE RELATIVE TO MALE)
+// ---------------------------------------------------------
+function getDegreeAtDate(dob, lagnaAbs, targetDate) {
+    const days = (targetDate - dob) / 86400000;
+    return (lagnaAbs + (days * (3/365.25)) + 360) % 360;
+}
+
+function getSignTransitions(dob, lagnaAbs) {
+    let dates = [new Date(dob)];
+    let currentAbs = lagnaAbs;
+    let currentDate = new Date(dob);
+    
+    for (let i = 0; i <= 10; i++) {
+        let degToNext = 30 - (currentAbs % 30);
+        if (degToNext === 0) degToNext = 30; 
+        let daysToNext = degToNext / (3/365.25);
+        let nextDate = new Date(currentDate.getTime() + (daysToNext * 86400000));
+        dates.push(nextDate);
+        currentDate = nextDate;
+        currentAbs = (currentAbs + degToNext) % 360;
+    }
+    return dates;
+}
+
+function getDurationString(start, end) {
+    let y = end.getFullYear() - start.getFullYear();
+    let m = end.getMonth() - start.getMonth();
+    let d = end.getDate() - start.getDate();
+    if (d < 0) {
+        m--;
+        let prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+        d += prevMonth.getDate();
+    }
+    if (m < 0) {
+        y--;
+        m += 12;
+    }
+    let parts = [];
+    if (y > 0) parts.push(`${y} year${y > 1 ? 's' : ''}`);
+    if (m > 0) parts.push(`${m} month${m > 1 ? 's' : ''}`);
+    if (d > 0) parts.push(`${d} day${d > 1 ? 's' : ''}`);
+    return parts.join(" ") || "0 days";
+}
+
+function generateMatchmakingTimeline(primaryIsMale) {
+    const tbody = document.getElementById("mmTimelineBody");
+    if (!tbody) return;
+
+    if (!window.mmPartnerInfo || !document.getElementById("dob")?.value) {
+        tbody.innerHTML = `<tr><td colspan="6" style="color: #94a3b8; padding: 20px;">Both Primary and Partner charts are required.</td></tr>`;
+        return;
+    }
+
+    const primaryDob = new Date(document.getElementById("dob").value + "T12:00:00");
+    const primaryLagna = (typeof absDeg === 'function') ? absDeg(
+        document.getElementById("birthSign").value, 
+        +document.getElementById("birthDeg").value, 
+        +document.getElementById("birthMin").value
+    ) : 0;
+
+    let fDob, fLagna, mDob, mLagna;
+
+    if (primaryIsMale) {
+        mDob = primaryDob; mLagna = primaryLagna;
+        fDob = window.mmPartnerInfo.dob; fLagna = window.mmPartnerInfo.lagnaAbs;
+    } else {
+        fDob = primaryDob; fLagna = primaryLagna;
+        mDob = window.mmPartnerInfo.dob; mLagna = window.mmPartnerInfo.lagnaAbs;
+    }
+
+    let fTransitions = getSignTransitions(fDob, fLagna);
+    let mTransitions = getSignTransitions(mDob, mLagna);
+    let allDates = [...fTransitions, ...mTransitions].sort((a,b) => a - b);
+
+    let uniqueDates = [];
+    for(let i=0; i<allDates.length; i++) {
+        if (i === 0 || (allDates[i] - allDates[i-1]) > 86400000) {
+            uniqueDates.push(allDates[i]);
+        }
+    }
+
+    const startDate = new Date(Math.max(fDob, mDob));
+    uniqueDates = uniqueDates.filter(d => d >= startDate);
+    if (uniqueDates.length === 0 || uniqueDates[0].getTime() > startDate.getTime()) {
+        uniqueDates.unshift(startDate);
+    }
+
+    let html = "";
+    const badDistances = [4, 6, 8, 10, 12];
+    const calcMode = document.querySelector('input[name="mmCalcMode"]:checked')?.value || 'sign';
+    
+    // Identify the target date for highlighted row
+    const mainTransitStr = document.getElementById("transitDate")?.value;
+    const currentTargetDate = mainTransitStr ? new Date(mainTransitStr + "T12:00:00") : new Date();
+
+    for (let i = 0; i < uniqueDates.length - 1; i++) {
+        let fromDate = uniqueDates[i];
+        let toDate = uniqueDates[i+1];
+        let midPoint = new Date(fromDate.getTime() + (toDate.getTime() - fromDate.getTime()) / 2);
+        
+        let fDeg = getDegreeAtDate(fDob, fLagna, midPoint);
+        let mDeg = getDegreeAtDate(mDob, mLagna, midPoint);
+        
+        let fSign = SIGNS[Math.floor(fDeg / 30)];
+        let mSign = SIGNS[Math.floor(mDeg / 30)];
+        let distance;
+
+        if (calcMode === 'sign') {
+            let fIndex = SIGNS.indexOf(fSign);
+            let mIndex = SIGNS.indexOf(mSign);
+            distance = (mIndex - fIndex + 12) % 12 + 1;
+        } else {
+            let diff = (mDeg - fDeg + 360) % 360;
+            distance = Math.floor(diff / 30) + 1;
+        }
+        
+        let isBad = badDistances.includes(distance);
+        let isCurrent = (currentTargetDate >= fromDate && currentTargetDate < toDate);
+        
+        let rowClass = isBad ? "mm-bad-row" : "mm-good-row";
+        if (isCurrent) rowClass += " mm-current-row"; // Adds yellow highlight if it's the running date
+
+        let durationStr = getDurationString(fromDate, toDate);
+
+        html += `<tr class="${rowClass}">
+            <td style="font-weight: normal;">${fromDate.toISOString().split("T")[0]}</td>
+            <td style="font-weight: normal;">${toDate.toISOString().split("T")[0]}</td>
+            <td style="color:#cbd5e1; font-weight: normal;">${durationStr}</td>
+            <td style="color:#f43f5e; font-weight: normal;">${fSign}</td>
+            <td style="color:#60a5fa; font-weight: normal;">${mSign}</td>
+            <td style="font-weight: normal;">${distance}</td>
+        </tr>`;
+    }
+
+    tbody.innerHTML = html;
+}
+
+if (!window.__MATCHMAKING_DLP_HOOK_V12__) {
+    window.__MATCHMAKING_DLP_HOOK_V12__ = true;
+    const _oldRecalcMatch = window.recalc || function(){};
+    window.recalc = function() {
+        _oldRecalcMatch();
+        renderMatchmakingCharts();
+    };
+    setTimeout(renderMatchmakingCharts, 500);
+}
+</script>
 
 
 
