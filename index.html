@@ -1934,9 +1934,9 @@ TABLE-1 : DATA INPUT TABLE
 
   <div style="width: 100%; max-width: 1300px; margin: 0 auto 30px auto; display: flex; justify-content: center;">
     <div style="background: linear-gradient(180deg, #020617, #020617dd); border: 1px solid #334155; padding: 10px 20px; border-radius: 8px; font-weight: 800; color: #f8fafc; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
-        <span id="drpStatusText" style="color:#93c5fd; letter-spacing: 0.5px;">MP : —</span>
+        <span id="drpStatusText" style="color:#93c5fd; letter-spacing: 0.5px;">Moon Progress : —</span>
         <span style="color:#334155;">|</span>
-        <span id="dlpStatusText" style="color:#fde047; letter-spacing: 0.5px;">LP : —</span>
+        <span id="dlpStatusText" style="color:#fde047; letter-spacing: 0.5px;">Lagna Progress : —</span>
         <span style="color:#334155;">|</span>
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#34d399;">
             <input type="checkbox" id="showDrpDlpCb" style="accent-color: #10b981; width: 16px; height: 16px; cursor: pointer; color-scheme: dark; background: #020617; border: 1px solid #334155;" onchange="if(typeof updateAllKundalis === 'function') updateAllKundalis(); if(typeof renderMatchmakingCharts === 'function') renderMatchmakingCharts(); if(typeof updateMixerEngine === 'function') updateMixerEngine();">
@@ -2277,8 +2277,8 @@ function updateAllKundalis() {
                 
                 const drpEl = document.getElementById("drpStatusText");
                 const dlpEl = document.getElementById("dlpStatusText");
-                if (drpEl) drpEl.textContent = `MP : ${drpStr}`;
-                if (dlpEl) dlpEl.textContent = `LP : ${dlpStr}`;
+                if (drpEl) drpEl.textContent = `Moon Progress : ${drpStr}`;
+                if (dlpEl) dlpEl.textContent = `Lagna Progress : ${dlpStr}`;
                 
 				const showCb = document.getElementById("showDrpDlpCb");
                 if (showCb && showCb.checked) {
@@ -4759,10 +4759,21 @@ TABLE-6 : DPT LORD TO ITS DLP NAKSHATRA DISTANCE <span id="t6ToggleIcon" style="
   <div id="table6NavamshaSummary" style="color:#facc15; font-weight:900; font-size:16px; letter-spacing:1.5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); margin:0;">
     NAVAMSHA (D9) :: — :: —
   </div>
+  
+  <label style="color:#facc15; font-weight:900; font-size:15px; display:flex; align-items:center; gap:8px; cursor:pointer; margin:0;">
+    <input type="checkbox" id="t6ModifiedRuleToggle" checked onchange="if(typeof buildTable6Distance === 'function') buildTable6Distance()" style="accent-color: #facc15; width:16px; height:16px; cursor:pointer;">
+    Original Rule
+</label>
+  
 </div>
 </div>
 
 <script>
+
+
+
+
+
 /* =========================================================
    TABLE-6 : DISTANCE LOGIC (PULLS FROM T4 AND T3)
    ========================================================= */
@@ -4778,6 +4789,10 @@ function buildTable6Distance(){
 
     let goodHouses = [];
     let badHouses = [];
+
+    // Check if the Modified Rule checkbox is present and checked
+    const modifiedRuleCb = document.getElementById("t6ModifiedRuleToggle");
+    const useModifiedRule = modifiedRuleCb ? modifiedRuleCb.checked : true; // True by default (Modified Rule)
 
     // Iterate through the 12 Houses
     for(let h = 1; h <= 12; h++){
@@ -4806,25 +4821,42 @@ function buildTable6Distance(){
 
             relationStr = `${dist1}/${dist2}`;
 
-            // Apply specific Good/Bad rules (2-12 vs 12-2, 4-10 vs 10-4)
-            if (dist1 === 1) { 
-                resultStr = "Good"; resultColor = "#34d399"; 
-            } else if (dist1 === 2 && dist2 === 12) { 
-                resultStr = "Good"; resultColor = "#34d399"; 
-            } else if (dist1 === 12 && dist2 === 2) { 
-                resultStr = "Bad"; resultColor = "#ef4444"; 
-            } else if (dist1 === 3 || dist1 === 11) { 
-                resultStr = "Very Good"; resultColor = "#10b981"; 
-            } else if (dist1 === 4 && dist2 === 10) { 
-                resultStr = "Good"; resultColor = "#34d399"; 
-            } else if (dist1 === 10 && dist2 === 4) { 
-                resultStr = "Pressure"; resultColor = "#34d399"; 
-            } else if (dist1 === 5 || dist1 === 9) { 
-                resultStr = "Very Good"; resultColor = "#10b981"; 
-            } else if (dist1 === 6 || dist1 === 8) { 
-                resultStr = "Very Bad"; resultColor = "#ef4444"; 
-            } else if (dist1 === 7) { 
-                resultStr = "Good"; resultColor = "#34d399"; 
+            if (!useModifiedRule) {
+                // =====================================
+                // ORIGINAL RULE (Default state)
+                // =====================================
+                if (dist1 === 1) { 
+                    resultStr = "Good"; resultColor = "#34d399"; 
+                } else if (dist1 === 2 && dist2 === 12) { 
+                    resultStr = "Good"; resultColor = "#34d399"; 
+                } else if (dist1 === 12 && dist2 === 2) { 
+                    resultStr = "Bad"; resultColor = "#ef4444"; 
+                } else if (dist1 === 3 || dist1 === 11) { 
+                    resultStr = "Very Good"; resultColor = "#10b981"; 
+                } else if (dist1 === 4 && dist2 === 10) { 
+                    resultStr = "Good"; resultColor = "#34d399"; 
+                } else if (dist1 === 10 && dist2 === 4) { 
+                    resultStr = "Pressure"; resultColor = "#34d399"; 
+                } else if (dist1 === 5 || dist1 === 9) { 
+                    resultStr = "Very Good"; resultColor = "#10b981"; 
+                } else if (dist1 === 6 || dist1 === 8) { 
+                    resultStr = "Very Bad"; resultColor = "#ef4444"; 
+                } else if (dist1 === 7) { 
+                    resultStr = "Good"; resultColor = "#34d399"; 
+                }
+            } else {
+                // =====================================
+                // NEW MODIFIED RULE (When checkbox clicked)
+                // =====================================
+                if (dist1 === 1 || dist1 === 7) { 
+                    resultStr = "Good"; resultColor = "#34d399"; 
+                } else if (dist1 === 3 || dist1 === 11 || dist1 === 5 || dist1 === 9) { 
+                    resultStr = "Very Good"; resultColor = "#10b981"; 
+                } else if (dist1 === 2 || dist1 === 12 || dist1 === 4 || dist1 === 10) { 
+                    resultStr = "Bad"; resultColor = "#ef4444"; 
+                } else if (dist1 === 6 || dist1 === 8) { 
+                    resultStr = "Very Bad"; resultColor = "#ef4444"; 
+                }
             }
             
             // Collect into Good / Bad Arrays
@@ -4884,6 +4916,12 @@ function buildTable6Distance(){
         setTimeout(applyStoredHighlights, 10);
     }
 }
+
+
+
+
+
+
 
 /* =========================================================
    TABLE-6 HOOK: ENSURE IT RUNS AFTER T3 & T4 RENDER
@@ -9359,8 +9397,8 @@ function renderMatchmakingCharts() {
         const partnerAlp = dynamicPartnerAlp;
 
         const maleAlp = primaryIsMale ? primaryAlp : partnerAlp;
-        // 🔥 FIX: Correctly assign the Partner's DLP to the Female when Primary is Male
-        const femaleAlp = primaryIsMale ? partnerAlp : primaryAlp; 
+		// 🔥 FIX: Correctly assign the Partner's DLP to the Female when Primary is Male
+		const femaleAlp = primaryIsMale ? partnerAlp : primaryAlp;
 
         // 🔥 FIX: House calculation is now mathematically based on Navamsha (D9) of the current DLP
         function getHouseGroup(alp) {
@@ -9435,9 +9473,9 @@ function renderMatchmakingCharts() {
     } catch(err) { console.error("DLP Match Logic Error:", err); }
 
     // 🔥 FIX: Pass the exact current dynamic degrees into the timeline generator
-    const activeFemaleAlp = primaryIsMale ? dynamicPartnerAlp : primaryAlp;
-    const activeMaleAlp = primaryIsMale ? primaryAlp : dynamicPartnerAlp;
-    generateMatchmakingTimeline(primaryIsMale, activeFemaleAlp, activeMaleAlp);
+	const activeFemaleAlp = primaryIsMale ? dynamicPartnerAlp : primaryAlp;
+	const activeMaleAlp = primaryIsMale ? primaryAlp : dynamicPartnerAlp;
+	generateMatchmakingTimeline(primaryIsMale, activeFemaleAlp, activeMaleAlp);
 }
 
 
