@@ -879,15 +879,23 @@ input[type="radio"]{
             </div>
         </div>
         
-        <div class="form-group">
-            <span style="font-size: 14px; color: #f8fafc;">&#x1F4CD; Standard Places</span>
-            <select id="locationPreset" onchange="applyPresetLocation()" style="width: 190px; font-size: 14px;">
-                <option value="manual">Manual GPS (Default)</option>
-                <option value="13.3190737,77.1326306">Tumakuru</option>
-                <option value="12.918880,77.634986">Bengaluru</option>
-                <option value="13.315527,76.942059">Gubbi</option>
-                <option value="12.304776,76.655108">Mysore</option>
-            </select>
+        <div style="display: flex; gap: 30px; align-items: flex-end; flex: 1;">
+            <div class="form-group">
+                <span style="font-size: 14px; color: #f8fafc;">&#x1F4CD; Standard Places</span>
+                <select id="locationPreset" onchange="applyPresetLocation()" style="width: 190px; font-size: 14px;">
+                    <option value="manual">Manual GPS (Default)</option>
+                    <option value="13.3190737,77.1326306">Tumakuru</option>
+                    <option value="12.918880,77.634986">Bengaluru</option>
+                    <option value="13.315527,76.942059">Gubbi</option>
+                    <option value="12.304776,76.655108">Mysore</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="padding-bottom: 1px;">
+                <div id="ageOutlineBox" style="border: 1px solid var(--grid-line); padding: 6px 16px; border-radius: 8px; background: #020617; color: var(--asc-yellow); font-size: 15px; font-weight: 800; white-space: nowrap; height: 34px; display: flex; align-items: center; letter-spacing: 0.5px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(52,211,153,0.2);">
+                    Age : &nbsp;-- years&nbsp; : -- months : -- days
+                </div>
+            </div>
         </div>
     </div>
     
@@ -947,6 +955,71 @@ input[type="radio"]{
 </div>
 
 <script>
+
+
+
+
+	function calculateAgeLive() {
+        const dInput = document.getElementById("onDay");
+        const mInput = document.getElementById("onMonth");
+        const yInput = document.getElementById("onYear");
+        const display = document.getElementById("ageOutlineBox");
+        
+        if (!dInput || !mInput || !yInput || !display) return;
+
+        const d = parseInt(dInput.value, 10);
+        const m = parseInt(mInput.value, 10);
+        const y = parseInt(yInput.value, 10);
+        
+        if (isNaN(d) || isNaN(m) || isNaN(y) || y < 1000) {
+            display.innerHTML = "Age : &nbsp;-- years&nbsp; : -- months : -- days";
+            return;
+        }
+
+        const dob = new Date(y, m - 1, d);
+        const today = new Date(); 
+        
+        if (dob > today) {
+            display.innerHTML = "Age : &nbsp;Future Date";
+            return;
+        }
+
+        let years = today.getFullYear() - dob.getFullYear();
+        let months = today.getMonth() - dob.getMonth();
+        let days = today.getDate() - dob.getDate();
+
+        if (days < 0) {
+            months--;
+            const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        
+        display.innerHTML = `Age : &nbsp;${years} years&nbsp; : ${months} months : ${days} days`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const box = document.getElementById("onlineFetchBox");
+        if (box) {
+            box.addEventListener("input", calculateAgeLive);
+            box.addEventListener("keyup", calculateAgeLive);
+            box.addEventListener("change", calculateAgeLive);
+        }
+        setInterval(calculateAgeLive, 400);
+    });
+	
+	
+	
+	
+
+
+
+
+
+
     // --- SERVER COLD START ---
     document.addEventListener("DOMContentLoaded", () => {
         fetch('https://donnie-astro-engine.onrender.com/', { method: 'GET', mode: 'no-cors' }).catch(() => {});
@@ -1189,6 +1262,7 @@ input[type="radio"]{
             
             if (result.status === "success") {
                 const dataPayload = result.data;
+                window.raw = dataPayload; // Store globally for offline saving
 
                 // --- DLP NATIVE INJECTION SEQUENCE ---
                 
@@ -1294,6 +1368,17 @@ input[type="radio"]{
     function saveCloudProfile() {
         const name = document.getElementById("onName").value.trim();
         if (name.length < 2) return;
+        
+        // Ensure chart data is ready to save
+        if (typeof window.raw === "undefined" || !window.raw) {
+            console.warn("No chart data fetched yet! Fetch online first.");
+            return;
+        }
+
+        // Keep file lean by deleting Sayana if it exists
+        if (window.raw.ayanamshas && window.raw.ayanamshas["Sayana"]) {
+            delete window.raw.ayanamshas["Sayana"];
+        }
 
         const profileData = {
             type: "CloudHoroscopeProfile",
@@ -1311,7 +1396,8 @@ input[type="radio"]{
             coords: {
                 lat: document.getElementById("onlineLat").value,
                 lon: document.getElementById("onlineLon").value
-            }
+            },
+            chartData: window.raw
         };
         const dataStr = JSON.stringify(profileData, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
@@ -1327,7 +1413,19 @@ input[type="radio"]{
         URL.revokeObjectURL(url);
     }
 
-    function loadCloudProfile(event) {
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	function loadCloudProfile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
@@ -1335,28 +1433,110 @@ input[type="radio"]{
         reader.onload = function(e) {
             try {
                 if(typeof clearFetchData === "function") clearFetchData();
-                const data = JSON.parse(e.target.result);
-                if (data.type !== "CloudHoroscopeProfile") return;
+                
+                // FIX: Renamed variable to 'jsonData' so it stops hiding the global 'data' array
+                const jsonData = JSON.parse(e.target.result);
+                if (jsonData.type !== "CloudHoroscopeProfile") return;
 
-                document.getElementById("onName").value = data.name || "";
-                if (data.date) {
-                    document.getElementById("onDay").value = data.date.d || "";
-                    document.getElementById("onMonth").value = data.date.m || "";
-                    document.getElementById("onYear").value = data.date.y || "";
+                document.getElementById("onName").value = jsonData.name || "";
+                if (jsonData.date) {
+                    document.getElementById("onDay").value = jsonData.date.d || "";
+                    document.getElementById("onMonth").value = jsonData.date.m || "";
+                    document.getElementById("onYear").value = jsonData.date.y || "";
                 }
-                if (data.time) {
-                    document.getElementById("onHour").value = data.time.h || "";
-                    document.getElementById("onMin").value = data.time.min || "";
-                    document.getElementById("onSec").value = data.time.sec || "00";
+                if (jsonData.time) {
+                    document.getElementById("onHour").value = jsonData.time.h || "";
+                    document.getElementById("onMin").value = jsonData.time.min || "";
+                    document.getElementById("onSec").value = jsonData.time.sec || "00";
                 }
-                if (data.coords) {
-                    document.getElementById("onlineLat").value = data.coords.lat || "";
-                    document.getElementById("onlineLon").value = data.coords.lon || "";
+                if (jsonData.coords) {
+                    document.getElementById("onlineLat").value = jsonData.coords.lat || "";
+                    document.getElementById("onlineLon").value = jsonData.coords.lon || "";
                     document.getElementById("locationPreset").value = "manual"; 
                     syncCoords('dec');
                 }
 
-                setTimeout(() => { if (typeof fetchFromCloud === "function") fetchFromCloud(); }, 300);
+                if (jsonData.chartData) {
+                    // --- OFFLINE MODE: Bypass server and inject instantly ---
+                    window.raw = jsonData.chartData;
+                    
+                    const y = jsonData.date.y;
+                    const m = String(jsonData.date.m).padStart(2, '0');
+                    const d = String(jsonData.date.d).padStart(2, '0');
+                    
+                    document.getElementById("dob").value = `${y}-${m}-${d}`;
+                    document.getElementById("transitDate").value = new Date().toISOString().split("T")[0];
+
+                    if(window.raw.planets_retro){
+                        Object.keys(window.raw.planets_retro).forEach(p=>{
+                            if(typeof SWISS_TO_INTERNAL_PLANET_MAP !== 'undefined' && SWISS_TO_INTERNAL_PLANET_MAP[p]){
+                                PLANET_RETRO[SWISS_TO_INTERNAL_PLANET_MAP[p]] = !!window.raw.planets_retro[p];
+                            }
+                        });
+                    }
+                    
+                    if(typeof window.raw.lagna === "number"){
+                        const lagAbs = ((window.raw.lagna % 360) + 360) % 360;
+                        const sIdx = Math.floor(lagAbs / 30);
+                        const deg  = Math.floor(lagAbs % 30);
+                        const pmin  = Math.floor(((lagAbs % 30) - deg) * 60);
+
+                        document.getElementById("birthSign").value = SIGNS[sIdx];
+                        document.getElementById("birthDeg").value  = deg;
+                        document.getElementById("birthMin").value  = pmin;
+                    }
+
+                    if(window.raw.planets){
+                        // Since we renamed the JSON payload, the global 'data' array is now safely accessible!
+                        Object.keys(data).forEach(p=>{
+                            data[p].sign = ""; data[p].deg = 0; data[p].min = 0; data[p].sec = 0;
+                        });
+                        
+                        TRUE_NODE_ABS = null;
+                        MEAN_NODE_ABS = null;
+                        RAHU_ABS_CURRENT = null;
+
+                        Object.entries(window.raw.planets).forEach(([rawName, absVal])=>{
+                            const abs = ((absVal % 360) + 360) % 360;
+                            if(rawName === "Rahu"){ MEAN_NODE_ABS = abs; return; }
+                            if(rawName === "Rahu_true"){ TRUE_NODE_ABS = abs; return; }
+                            
+                            const internal = SWISS_TO_INTERNAL_PLANET_MAP[rawName];
+                            if(!internal || !data[internal]) return;
+
+                            const sIdx = Math.floor(abs / 30);
+                            const pDeg  = Math.floor(abs % 30);
+                            const pMin  = Math.floor(((abs % 30) - pDeg) * 60);
+                            const pSec  = Math.round(((((abs % 30) - pDeg) * 60) - pMin) * 60);
+
+                            data[internal].sign = SIGNS[sIdx];
+                            data[internal].deg  = pDeg;
+                            data[internal].min  = pMin;
+                            data[internal].sec  = pSec;
+                        });
+
+                        const selectedNodeRadio = document.querySelector('input[name="nodeMode"]:checked');
+                        if(selectedNodeRadio) NODE_MODE = selectedNodeRadio.value;
+                        if(NODE_MODE === "TRUE" && TRUE_NODE_ABS === null) NODE_MODE = "MEAN";
+                        if(NODE_MODE === "MEAN" && MEAN_NODE_ABS === null) NODE_MODE = "TRUE";
+                        
+                        if(typeof applySelectedNode === "function") applySelectedNode();
+                    }
+
+                    manualDLPAbs = null;
+                    if(typeof __DLP_LAGNA_MANUAL__ !== 'undefined') __DLP_LAGNA_MANUAL__ = false;
+                    
+                    if(typeof buildTable === "function") buildTable();
+                    setTimeout(() => {
+                        if(typeof recalc === "function") recalc();
+                        if(typeof updateCurrentAge === "function") updateCurrentAge();
+                    }, 50);
+
+                } else {
+                    // --- STRICT OFFLINE MODE ---
+                    // Only populates the inputs. Strictly blocks auto-fetching from the server.
+                    console.log("> Profile Loaded: Inputs populated. Press 'Fetch Data' manually if you want to update from the server.");
+                }
             } catch (error) {
                 console.error("Error parsing profile JSON:", error);
             }
